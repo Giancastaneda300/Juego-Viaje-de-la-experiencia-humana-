@@ -1,0 +1,2882 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>El viaje de la experiencia humana</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #0d0a16; color: #f7f3e8; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 18px; }
+    #title-screen { position: fixed; inset: 0; z-index: 5; display: grid; place-items: center; padding: 24px; background: radial-gradient(ellipse at 50% 38%, #5a2d7c 0, #20162d 46%, #0c0a16 100%); overflow: hidden; }
+    #title-screen::before, #title-screen::after {
+      content: "";
+      position: absolute; inset: auto;
+      border-radius: 50%;
+      pointer-events: none;
+      filter: blur(12px);
+      opacity: .7;
+    }
+    #title-screen::before {
+      width: 420px; height: 420px; left: 10%; top: 10%; background: rgba(161, 104, 255, 0.18);
+    }
+    #title-screen::after {
+      width: 480px; height: 480px; right: 8%; bottom: 6%; background: rgba(255, 153, 79, 0.14);
+    }
+    #title-screen[hidden] { display: none; }
+    .title-card {
+      position: relative; display: grid; justify-items: center; gap: clamp(18px, 3vh, 32px); width: min(760px, 100%); padding: clamp(24px, 5vw, 54px) clamp(20px, 4vw, 42px);
+      text-align: center; border: 1px solid rgba(255, 214, 130, 0.4); border-radius: 26px;
+      background: linear-gradient(180deg, rgba(33, 22, 43, 0.82), rgba(18, 12, 24, 0.7));
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.38), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(4px);
+    }
+    .title-badge {
+      padding: 8px 18px; border: 1px solid rgba(255, 220, 133, 0.6); border-radius: 999px; color: #ffd886; font-size: .75rem; letter-spacing: .14em; text-transform: uppercase; background: rgba(60, 34, 81, 0.5);
+    }
+    .title-card h1 { margin: 0; color: #ffe28a; font-size: clamp(2.2rem, 8vw, 5.2rem); line-height: 1.08; text-wrap: balance; text-shadow: 0 5px 25px #0008; }
+    .title-subtitle { margin: 0; color: #f3e9d2; font-size: clamp(1rem, 2.1vw, 1.35rem); opacity: .9; }
+    .title-decor {
+      position: absolute; inset: 0; pointer-events: none;
+    }
+    .title-decor span {
+      position: absolute; display: grid; place-items: center; font-size: clamp(1.2rem, 2vw, 2rem); opacity: .85;
+    }
+    .title-decor .moon { width: 80px; height: 80px; right: 12%; top: 6%; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff5d3, #f2d085 55%, #d9a94c 100%); box-shadow: 0 0 30px rgba(255, 208, 104, 0.7); }
+    .title-decor .moon::before { content: ""; position: absolute; inset: 18px 18px auto auto; width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.18); }
+    .title-decor .bat-1 { left: 12%; top: 18%; transform: rotate(-12deg); }
+    .title-decor .bat-2 { right: 18%; bottom: 18%; transform: rotate(12deg); }
+    #play-button { min-width: 180px; padding: 15px 32px; border: 2px solid #ffcf7a; border-radius: 999px; font-size: 1.2rem; box-shadow: 0 8px 30px rgba(0,0,0,.45), 0 0 20px rgba(255, 198, 93, 0.35); background: linear-gradient(180deg, #4b2a54, #20162a); color: #fff2cb; font-weight: 700; transition: transform .2s ease, box-shadow .2s ease, background .2s ease; }
+    #play-button:hover { transform: translateY(-2px); background: linear-gradient(180deg, #ffcf7a, #f4a95d); color: #1d1326; box-shadow: 0 12px 32px rgba(255, 173, 82, 0.45); }
+    main { width: min(960px, 100%); overflow: hidden; border: 1px solid #8a5ec5; border-radius: 18px; background: #1d1429; box-shadow: 0 20px 70px #05091499; }
+    header, footer { padding: 14px 20px; }
+    header { display: flex; justify-content: space-between; gap: 12px; align-items: center; border-bottom: 1px solid #ffffff20; }
+    .header-actions { display: flex; align-items: center; gap: 12px; }
+    h1 { margin: 0; font-size: clamp(1rem, 3vw, 1.4rem); }
+    #progress { color: #ffe28a; white-space: nowrap; }
+    .diary-panel { margin: 0 0 14px; padding: 14px 16px; border: 1px solid rgba(255, 214, 130, 0.35); border-radius: 16px; background: linear-gradient(180deg, rgba(43, 28, 52, 0.6), rgba(17, 12, 28, 0.8)); }
+    .diary-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .diary-header h3 { margin: 0; color: #ffe28a; font-size: .96rem; letter-spacing: .04em; text-transform: uppercase; }
+    #diary-badge { padding: 5px 10px; border-radius: 999px; color: #1a1321; background: #ffcf7a; font-weight: 700; font-size: .78rem; }
+    #diary-pages { display: grid; gap: 8px; }
+    .diary-page { display: grid; grid-template-columns: 32px minmax(0, 1fr); align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid rgba(255,255,255,.08); border-radius: 12px; color: #f3e9d2; background: rgba(255,255,255,.02); }
+    .diary-page.done { border-color: rgba(147, 214, 165, 0.5); background: rgba(147, 214, 165, 0.08); }
+    .diary-page.current { border-color: rgba(255, 207, 122, 0.7); background: rgba(255, 207, 122, 0.09); }
+    .diary-page .diary-icon { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; font-size: 1rem; background: rgba(255,255,255,.05); }
+    .diary-page strong { display: block; font-size: .82rem; color: #ffe28a; }
+    .diary-page span { display: block; font-size: .75rem; opacity: .8; }
+    .reward-strip { margin-top: 12px; }
+    .reward-strip h4 { margin: 0 0 8px; color: #f3e9d2; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; opacity: .8; }
+    #reward-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .reward-item { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border: 1px solid rgba(255,255,255,.08); border-radius: 999px; color: #fff7df; background: rgba(255,255,255,.04); font-size: .74rem; }
+    .reward-item.unlocked { border-color: rgba(255, 214, 130, 0.55); background: rgba(255, 214, 130, 0.12); }
+    .bread-collection { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .bread-piece { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); font-size: 1rem; opacity: .45; }
+    .bread-piece.unlocked { border-color: rgba(255, 214, 130, 0.7); background: radial-gradient(circle at 30% 30%, #f8deb2, #dca35f 55%, #b96b2f 100%); opacity: 1; box-shadow: 0 0 16px rgba(255, 199, 86, 0.35); }
+    #eat-pan-button { margin-top: 12px; width: 100%; padding: 10px 12px; border: 1px solid rgba(255, 220, 133, 0.6); border-radius: 12px; color: #1f1622; background: linear-gradient(180deg, #ffdca3, #f4b45d); font-weight: 700; }
+    #eat-pan-button[hidden] { display: none; }
+    .scene { position: relative; }
+    canvas { display: block; width: 100%; aspect-ratio: 16 / 9; background: #bbd9cc; image-rendering: pixelated; touch-action: none; }
+    #mini-game { position: absolute; z-index: 1; inset: 0; display: grid; place-items: center; padding: 18px; background: #101a30a8; }
+    #mini-game[hidden] { display: none; }
+    .mini-game-card { width: min(520px, 100%); padding: clamp(14px, 3vw, 24px); border: 2px solid #ffe28a; border-radius: 18px; background: #17233af2; box-shadow: 0 15px 50px #0009; text-align: center; }
+    .mini-game-card h2 { margin: 0 0 8px; color: #ffe28a; font-size: clamp(1.05rem, 3vw, 1.4rem); }
+    .mini-game-card p { margin: 0 0 14px; color: #fff7df; }
+    .mini-game-stats { display: flex; justify-content: space-between; gap: 10px; margin: 0 0 10px; color: #ffe28a; font-size: .82rem; font-weight: 700; }
+    .mini-game-progress { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; margin: 0 0 12px; color: #f3e9d2; font-size: .75rem; }
+    .mini-game-progress[hidden] { display: none; }
+    .mini-game-progress-track { height: 9px; overflow: hidden; border: 1px solid rgba(255,255,255,.14); border-radius: 999px; background: rgba(255,255,255,.08); }
+    #mini-game-progress-fill { width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #93d6a5, #ffe28a); transition: width .3s ease; }
+    .mini-game-card.spark-pop { animation: miniGamePop .28s ease; }
+    .mini-game-options button, .match-card, .game-tile, .mural-cell, .habitat-cell, .route-cell, .pipe-cell { transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease; }
+    .mini-game-options button:active, .match-card:active, .game-tile:active, .mural-cell:active, .habitat-cell:active, .route-cell:active, .pipe-cell:active { transform: scale(.94); }
+    #spark-score { min-width: max-content; padding: 5px 9px; border: 1px solid rgba(255, 214, 130, .45); border-radius: 999px; color: #ffe28a; background: rgba(255, 214, 130, .08); font-size: .82rem; font-weight: 800; transition: transform .18s ease, box-shadow .18s ease; }
+    #spark-score.spark-pop { transform: scale(1.12); box-shadow: 0 0 18px rgba(255, 207, 122, .5); }
+    #mini-game-board { display: grid; gap: 10px; margin: 14px auto; max-width: 430px; }
+    #mini-game-board[hidden] { display: none; }
+    .mini-game-question { margin: 0 0 8px; color: #ffe28a; font-weight: 700; }
+    .mini-game-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .mini-game-options button, .match-card, .game-tile { min-width: 0; min-height: 48px; color: #fff7df; background: #344563; touch-action: manipulation; }
+    .mini-game-options button:hover, .match-card:hover, .game-tile:hover { background: #465b7c; }
+    .match-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .match-card { display: grid; place-items: center; padding: 8px; font-size: clamp(.8rem, 2.5vw, 1rem); }
+    .match-card.revealed { border: 2px solid #ffe28a; color: #172139; background: #ffe28a; }
+    .match-card.matched { border: 2px solid #93d6a5; color: #172139; background: #93d6a5; }
+    .game-tile.selected { border: 2px solid #ffe28a; color: #172139; background: #ffe28a; }
+    .game-tile.correct { border: 2px solid #93d6a5; color: #172139; background: #93d6a5; }
+    .agenda-list, .ingredient-list, .evidence-grid { display: grid; gap: 8px; }
+    .agenda-list .game-tile { text-align: left; }
+    .ingredient-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .ingredient-list .game-tile { min-height: 58px; }
+    .constellation-board { position: relative; width: min(100%, 380px); height: 190px; margin: 0 auto; border: 1px solid #71829f; border-radius: 14px; background: radial-gradient(ellipse, #2b4560, #17233a); touch-action: manipulation; }
+    .constellation-lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+    .constellation-lines polyline { fill: none; stroke: #ffe28a; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    .constellation-node { position: absolute; min-width: 42px; min-height: 42px; padding: 4px; transform: translate(-50%, -50%); border: 1px solid #9cadc5; border-radius: 50%; color: #fff7df; background: #344563; font-size: 1.3rem; }
+    .constellation-node.done { border-color: #93d6a5; color: #172139; background: #93d6a5; }
+    .route-grid, .pipe-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; width: min(100%, 300px); margin: 0 auto; }
+    .route-cell, .pipe-cell { display: grid; place-items: center; min-width: 0; aspect-ratio: 1; padding: 3px; border: 1px solid #61718a; border-radius: 8px; font-size: clamp(1.15rem, 6vw, 1.8rem); }
+    .route-cell.blocked { color: #f0ad91; background: #633d45; }
+    .route-cell.visited { border-color: #93d6a5; background: #2e554a; }
+    .route-cell.player { outline: 3px solid #ffe28a; outline-offset: -3px; }
+    .pipe-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); width: min(100%, 240px); }
+    .pipe-cell { color: #99dcf0; font-size: clamp(1.7rem, 9vw, 2.6rem); }
+    .pipe-cell.empty { border-color: transparent; background: transparent; }
+    .pipe-cell.source, .pipe-cell.target { color: #ffe28a; }
+    .game-submit { width: 100%; }
+    .vote-list { display: grid; gap: 8px; }
+    .vote-row { display: grid; grid-template-columns: minmax(0, 1fr) 44px 48px 44px; align-items: center; gap: 6px; }
+    .vote-row span { text-align: left; }
+    .vote-row button, .mural-cell, .habitat-cell { min-width: 42px; min-height: 44px; padding: 5px; touch-action: manipulation; }
+    .mural-wrap { display: grid; gap: 8px; justify-items: center; }
+    .mural-grid, .habitat-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; width: min(100%, 240px); }
+    .mural-cell, .habitat-cell { aspect-ratio: 1; font-size: clamp(1.2rem, 7vw, 2rem); }
+    .mural-cell { background: #29364d; }
+    .mural-cell:hover, .habitat-cell:hover { background: #465b7c; }
+    .story-slots { display: grid; gap: 10px; }
+    .story-slot { display: grid; grid-template-columns: minmax(78px, .7fr) minmax(0, 1.5fr); align-items: center; gap: 8px; text-align: left; }
+    .story-slot label { color: #ffe28a; font-weight: 700; }
+    .story-slot select, .focus-control input { width: 100%; min-height: 44px; padding: 8px; border: 1px solid #71829f; border-radius: 8px; color: #fff7df; background: #25334d; font: inherit; }
+    .echo-board { display: grid; gap: 10px; justify-items: center; }
+    .echo-symbols { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; }
+    .echo-symbol { min-width: 48px; min-height: 48px; padding: 6px; border: 2px solid #61718a; border-radius: 12px; color: #fff7df; background: #344563; font-size: 1.5rem; touch-action: manipulation; }
+    .echo-symbol.active { border-color: #ffe28a; color: #172139; background: #ffe28a; transform: scale(1.12); }
+    .echo-symbol:disabled { opacity: .48; }
+    .focus-control { display: grid; gap: 10px; }
+    .focus-scene { display: grid; place-items: center; min-height: 96px; border: 1px solid #71829f; border-radius: 12px; background: radial-gradient(ellipse, #587047, #263d36); font-size: 2rem; }
+    .habitat-items { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; }
+    .habitat-item { min-height: 44px; padding: 8px; color: #fff7df; background: #344563; touch-action: manipulation; }
+    .habitat-item.selected { outline: 3px solid #ffe28a; }
+    .habitat-cell { border: 1px solid #71829f; background: #304c3f; }
+    .habitat-cell.correct { border-color: #93d6a5; background: #537354; }
+    #mini-game-status { min-height: 1.5em; margin-bottom: 12px; color: #ffe28a; font-weight: 700; }
+    #cinematic { position: absolute; inset: 0; display: flex; align-items: end; padding: clamp(12px, 3vw, 28px); background: linear-gradient(180deg, transparent 30%, #101a30bb 62%, #101a30f2); }
+    #cinematic[hidden] { display: none; }
+    .cinematic-card { width: min(660px, 100%); margin: 0 auto; padding: clamp(12px, 2.5vw, 22px); border: 1px solid #ffe28a99; border-radius: 14px; background: #17233aeF; box-shadow: 0 10px 40px #0008; }
+    .cinematic-card h2 { margin: 0 0 7px; color: #ffe28a; font-size: clamp(1rem, 3vw, 1.35rem); }
+    .cinematic-card p { margin: 0 0 12px; color: #f7f3e8; font-size: clamp(.85rem, 2vw, 1rem); }
+    .cinematic-card button { float: right; }
+    .cinematic-card::after { display: block; clear: both; content: ""; }
+    section { padding: 14px 20px; border-top: 1px solid #ffffff20; }
+    h2 { margin: 0 0 5px; color: #ffe28a; font-size: 1rem; }
+    p { margin: 0; line-height: 1.5; color: #d7dced; }
+    footer { border-top: 1px solid #ffffff14; text-align: center; color: #b6c0d2; font-size: .85rem; }
+    kbd { padding: 2px 6px; border: 1px solid #687590; border-radius: 5px; background: #25334d; color: white; }
+    #dialog { position: fixed; inset: 0; z-index: 2; display: grid; place-items: center; padding: 16px; background: #08101b99; }
+    #dialog[hidden] { display: none; }
+    .card { width: min(560px, 100%); padding: 20px; border: 1px solid #ffe28a; border-radius: 14px; background: #17233a; box-shadow: 0 15px 50px #0008; }
+    .card h2 { margin-bottom: 10px; }
+    .card p { margin-bottom: 16px; }
+    button { border: 0; border-radius: 8px; padding: 10px 16px; color: #172139; background: #ffe28a; font: inherit; font-weight: 700; cursor: pointer; }
+    #choices { display: grid; gap: 8px; }
+    #choices[hidden] { display: none; }
+    #choices button { color: #fff7df; background: #344563; text-align: left; }
+    #choices button:hover { background: #465b7c; }
+    .touch { display: none; align-items: center; justify-content: center; gap: 16px; padding: 10px 12px calc(14px + env(safe-area-inset-bottom)); }
+    .touch-pad { display: grid; grid-template-columns: repeat(3, 58px); grid-template-rows: repeat(2, 54px); gap: 5px; }
+    .touch button { min-width: 58px; min-height: 54px; padding: 8px; touch-action: none; user-select: none; -webkit-user-select: none; }
+    .touch-pad [data-key="ArrowUp"] { grid-column: 2; grid-row: 1; }
+    .touch-pad [data-key="ArrowLeft"] { grid-column: 1; grid-row: 2; }
+    .touch-pad [data-key="ArrowDown"] { grid-column: 2; grid-row: 2; }
+    .touch-pad [data-key="ArrowRight"] { grid-column: 3; grid-row: 2; }
+    .touch-action { min-width: 120px !important; min-height: 64px !important; }
+    @media (pointer: coarse), (any-pointer: coarse) {
+      .touch { display: flex; }
+    }
+    #share-status { margin-top: 8px; color: #ffe28a; font-size: .85rem; }
+    #action-toast { position: absolute; z-index: 1; top: 14px; left: 50%; width: max-content; max-width: calc(100% - 28px); padding: 10px 15px; transform: translate(-50%, -10px); border: 1px solid #ffe28a; border-radius: 12px; color: #fff7df; background: #17233aeb; box-shadow: 0 8px 24px #0005; text-align: center; opacity: 0; pointer-events: none; transition: opacity .18s ease, transform .18s ease; }
+    #action-toast.visible { opacity: 1; transform: translate(-50%, 0); }
+    #reward-burst { position: absolute; z-index: 2; inset: 0; display: grid; place-items: center; pointer-events: none; opacity: 0; transition: opacity .2s ease; }
+    #reward-burst.visible { opacity: 1; }
+    #reward-burst[hidden] { display: none; }
+    .reward-burst-card { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border: 1px solid rgba(255, 214, 130, 0.8); border-radius: 18px; background: rgba(23, 35, 58, 0.94); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.34); transform: scale(.72) translateY(14px); opacity: 0; }
+    #reward-burst.visible .reward-burst-card { animation: rewardBurstIn .9s cubic-bezier(.2, .8, .2, 1) forwards; }
+    .reward-burst-icon { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; font-size: 1.8rem; background: radial-gradient(circle at 30% 30%, #fff3c8, #ffcf7a 46%, #d77b2d 100%); box-shadow: 0 0 24px rgba(255, 207, 122, 0.45); }
+    .reward-burst-copy { display: grid; text-align: left; }
+    .reward-burst-copy strong { color: #ffe28a; font-size: .82rem; letter-spacing: .08em; text-transform: uppercase; }
+    .reward-burst-copy span { color: #f3e9d2; }
+    #reward-overlay { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; padding: 24px; background: rgba(13, 8, 19, 0.48); backdrop-filter: blur(3px); opacity: 0; visibility: hidden; transition: opacity .25s ease, visibility .25s ease; }
+    #reward-overlay.visible { opacity: 1; visibility: visible; }
+    #reward-overlay[hidden] { display: none; }
+    .reward-overlay-card { display: grid; gap: 12px; width: min(540px, 100%); padding: 26px 24px; border: 1px solid rgba(255, 214, 130, 0.85); border-radius: 28px; background: linear-gradient(180deg, rgba(34, 20, 42, 0.96), rgba(16, 13, 28, 0.95)); box-shadow: 0 30px 80px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(255,255,255,.03); text-align: center; transform: scale(.82) translateY(26px); opacity: 0; }
+    #reward-overlay.visible .reward-overlay-card { animation: rewardOverlayIn .7s cubic-bezier(.2,.8,.2,1) forwards; }
+    .reward-overlay-badge { display: grid; place-items: center; width: 72px; height: 72px; margin: 0 auto; border-radius: 50%; font-size: 2.6rem; background: radial-gradient(circle at 30% 30%, #fff7d7, #ffd07a 45%, #e08a3a 100%); box-shadow: 0 0 38px rgba(255, 184, 75, 0.55); }
+    .reward-overlay-card h3 { margin: 0; color: #ffdf8d; font-size: clamp(1.8rem, 4vw, 2.8rem); }
+    .reward-overlay-card p { margin: 0; color: #f3e9d2; font-size: 1.05rem; line-height: 1.5; }
+    #reward-overlay-button { margin-top: 8px; padding: 12px 24px; border-radius: 999px; border: 1px solid rgba(255, 220, 133, 0.6); background: linear-gradient(180deg, #ffdb78, #f2a95a); color: #1f1522; box-shadow: 0 14px 28px rgba(242, 169, 90, 0.25); }
+    #final-summary { position: fixed; inset: 0; z-index: 12; display: grid; place-items: center; padding: 24px; overflow: hidden; background: rgba(8, 7, 16, 0.7); opacity: 0; visibility: hidden; transition: opacity .25s ease, visibility .25s ease; }
+    #final-summary.visible { opacity: 1; visibility: visible; }
+    #final-summary[hidden] { display: none; }
+    .final-confetti { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+    .final-confetti-piece { position: absolute; top: -12%; width: 9px; height: 15px; border-radius: 2px; opacity: .95; animation: confettiFall var(--duration) cubic-bezier(.2,.65,.3,1) var(--delay) both; }
+    .final-confetti-piece.circle { width: 10px; height: 10px; border-radius: 50%; }
+    .final-summary-card { position: relative; z-index: 1; width: min(860px, 100%); max-height: min(90vh, 920px); overflow: auto; padding: 22px 20px 18px; border: 1px solid rgba(255, 214, 130, 0.75); border-radius: 26px; background: linear-gradient(180deg, rgba(29, 18, 38, 0.96), rgba(12, 10, 20, 0.98)); box-shadow: 0 30px 90px rgba(0, 0, 0, 0.5); transform: scale(.82) translateY(28px); opacity: 0; }
+    #final-summary.visible .final-summary-card { animation: rewardOverlayIn .7s cubic-bezier(.2,.8,.2,1) forwards; }
+    .final-summary-header { display: grid; gap: 8px; justify-items: center; margin-bottom: 18px; text-align: center; }
+    .final-summary-header h2 { margin: 0; color: #ffe28a; font-size: clamp(1.6rem, 3vw, 2.6rem); }
+    .final-summary-header p { margin: 0; color: #f3e9d2; }
+    .final-summary-layout { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(220px, .75fr); gap: 18px; }
+    .final-diary-list { display: grid; gap: 9px; }
+    .final-diary-item { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; background: rgba(255, 255, 255, 0.03); }
+    .final-diary-item.done { border-color: rgba(147, 214, 165, 0.6); background: rgba(147, 214, 165, 0.08); }
+    .final-diary-item .icon { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,.06); }
+    .final-diary-item strong { display: block; color: #ffe28a; font-size: .84rem; }
+    .final-diary-item span { display: block; color: #f2ead8; font-size: .72rem; opacity: .8; }
+    .final-pan-scene { display: grid; place-items: center; gap: 12px; padding: 18px 12px; border: 1px solid rgba(255, 214, 130, 0.6); border-radius: 16px; background: radial-gradient(circle at 50% 35%, rgba(255,192,99,.12), rgba(10,9,20,0.6) 55%); }
+    .final-pan-actor { position: relative; display: grid; place-items: center; width: 120px; height: 120px; border-radius: 50%; background: rgba(255,255,255,.04); }
+    #final-summary.visible .final-pan-actor { animation: celebrationGlow 1.6s ease-in-out infinite; }
+    .final-pan-actor::before { content: "🧑‍🍳"; display: inline-block; font-size: 3.8rem; transform-origin: 50% 85%; }
+    #final-summary.visible .final-pan-actor::before { animation: celebrateDance .8s ease-in-out infinite; }
+    .final-pan-actor::after { content: "🍞"; position: absolute; bottom: 18px; right: 18px; font-size: 2rem; animation: panChomp 1.5s ease-in-out infinite; }
+    @keyframes panChomp {
+      0%, 100% { transform: rotate(-12deg) translateY(0); }
+      25% { transform: rotate(8deg) translateY(-4px); }
+      50% { transform: scale(1.15) translateY(-6px); }
+      75% { transform: rotate(-6deg) translateY(0); }
+    }
+    .final-pan-scene p { margin: 0; color: #ffe28a; font-weight: 700; text-align: center; }
+    #final-summary-button { width: 100%; margin-top: 18px; border-radius: 999px; background: linear-gradient(180deg, #ffd985, #eea55b); color: #1e1627; }
+    @keyframes confettiFall {
+      0% { transform: translate3d(0, -10vh, 0) rotate(0); opacity: 1; }
+      100% { transform: translate3d(var(--drift), 112vh, 0) rotate(var(--spin)); opacity: .15; }
+    }
+    @keyframes celebrateDance {
+      0%, 100% { transform: translateY(0) rotate(-8deg) scale(1); }
+      25% { transform: translateY(-10px) rotate(12deg) scale(1.05); }
+      50% { transform: translateY(0) rotate(-10deg) scale(1); }
+      75% { transform: translateY(-8px) rotate(10deg) scale(1.04); }
+    }
+    @keyframes celebrationGlow {
+      0%, 100% { box-shadow: 0 0 12px rgba(255, 207, 122, .12); }
+      50% { box-shadow: 0 0 34px rgba(255, 207, 122, .42); }
+    }
+    @keyframes miniGamePop {
+      50% { transform: scale(1.025); box-shadow: 0 15px 55px rgba(255, 207, 122, .22); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .final-confetti-piece, #final-summary.visible .final-pan-actor, #final-summary.visible .final-pan-actor::before, .final-pan-actor::after { animation: none; }
+      .final-confetti-piece { top: 45%; opacity: .35; }
+      .mini-game-card.spark-pop { animation: none; }
+      #spark-score { transition: none; }
+    }
+    .bread-piece.unlocked { animation: breadUnlock .55s ease; }
+    @keyframes rewardBurstIn {
+      0% { opacity: 0; transform: scale(.72) translateY(18px); }
+      18% { opacity: 1; }
+      35% { transform: scale(1.08) translateY(-6px); }
+      60% { transform: scale(1) translateY(0); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    @keyframes rewardOverlayIn {
+      0% { opacity: 0; transform: scale(.82) translateY(26px); }
+      20% { opacity: 1; }
+      55% { transform: scale(1.04) translateY(-6px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    @keyframes breadUnlock {
+      0% { transform: scale(.48) rotate(-12deg); opacity: .25; }
+      50% { transform: scale(1.22) rotate(12deg); }
+      100% { transform: scale(1) rotate(0); opacity: 1; }
+    }
+    @media (max-width: 600px) {
+      body { padding: 8px; align-items: start; }
+      header, section, footer { padding-left: 12px; padding-right: 12px; }
+      #mini-game { position: fixed; z-index: 6; }
+      .mini-game-card { max-height: 100%; overflow-y: auto; }
+      .card { max-height: calc(100vh - 32px); overflow-y: auto; }
+      .header-actions { gap: 7px; flex-direction: column-reverse; align-items: end; }
+      #share { padding: 7px 10px; font-size: .8rem; }
+      .touch { gap: 10px; }
+      .touch-pad { grid-template-columns: repeat(3, 48px); grid-template-rows: repeat(2, 46px); gap: 4px; }
+      .touch button { min-width: 48px; min-height: 46px; }
+      .touch-action { min-width: 102px !important; min-height: 58px !important; }
+      footer { font-size: .75rem; }
+    }
+    @media (orientation: landscape) and (max-height: 500px) {
+      body { min-height: 100dvh; padding: 0; align-items: start; }
+      main { width: 100%; max-width: none; border: 0; border-radius: 0; }
+      header { min-height: 40px; padding: 5px 12px; }
+      header h1 { max-width: 34vw; font-size: clamp(.8rem, 2.2vw, 1rem); }
+      .header-actions { flex-direction: row; align-items: center; }
+      #progress { font-size: clamp(.65rem, 1.8vw, .85rem); }
+      .scene canvas { width: auto; height: min(70dvh, calc(100vw * 9 / 16)); max-width: 100%; margin: 0 auto; }
+      section { padding: 5px 12px; }
+      section h2 { font-size: .85rem; }
+      section p { overflow: hidden; font-size: .75rem; text-overflow: ellipsis; white-space: nowrap; }
+      footer { display: none; }
+      .touch { position: fixed; z-index: 2; top: 50%; right: 0; left: 0; justify-content: space-between; padding: 0 max(8px, env(safe-area-inset-left)) 0 max(8px, env(safe-area-inset-right)); transform: translateY(-50%); pointer-events: none; }
+      .touch-pad { grid-template-columns: repeat(3, 42px); grid-template-rows: repeat(2, 38px); gap: 3px; }
+      .touch button { min-width: 42px; min-height: 38px; pointer-events: auto; }
+      .touch-action { min-width: 88px !important; min-height: 50px !important; }
+    }
+  </style>
+</head>
+<body>
+  <div id="title-screen">
+    <div class="title-card">
+      <div class="title-decor" aria-hidden="true">
+        <span class="moon"></span>
+        <span class="bat-1">🦇</span>
+        <span class="bat-2">🦇</span>
+      </div>
+      <div class="title-badge">Halloween · aventura</div>
+      <h1>El viaje de la experiencia humana</h1>
+      <p class="title-subtitle">Una odisea de comunidad, memoria y descubrimiento</p>
+      <button id="play-button" type="button">Jugar</button>
+    </div>
+  </div>
+  <main id="game-shell" hidden>
+    <header>
+      <h1>El viaje de la experiencia humana</h1>
+      <div class="header-actions">
+        <div id="progress" aria-live="polite"></div>
+        <div id="spark-score" aria-live="polite" aria-label="Puntos de aventura: 0">✨ 0</div>
+        <button id="share" type="button">Compartir</button>
+      </div>
+    </header>
+    <div class="scene">
+      <canvas id="game" width="960" height="540" aria-label="Juego 2D: muévete y habla con los personajes"></canvas>
+      <div id="action-toast" aria-live="polite"></div>
+      <div id="reward-burst" hidden aria-live="polite">
+        <div class="reward-burst-card">
+          <span class="reward-burst-icon">🏆</span>
+          <div class="reward-burst-copy">
+            <strong>¡Premio recibido!</strong>
+            <span>Primera página</span>
+          </div>
+        </div>
+      </div>
+      <div id="reward-overlay" hidden aria-live="polite">
+        <div class="reward-overlay-card">
+          <div class="reward-overlay-badge">🏆</div>
+          <h3 class="reward-overlay-title">¡Has ganado!</h3>
+          <p class="reward-overlay-text">Has desbloqueado un nuevo premio.</p>
+          <button id="reward-overlay-button" type="button">Continuar</button>
+        </div>
+      </div>
+      <div id="final-summary" hidden aria-live="polite">
+        <div id="final-confetti" class="final-confetti" aria-hidden="true"></div>
+        <div class="final-summary-card">
+          <div class="final-summary-header">
+            <h2>Diario completo</h2>
+            <p id="final-summary-message">Alex recoge todas las páginas y disfruta el último trozo de pan de muerto.</p>
+          </div>
+          <div class="final-summary-layout">
+            <div id="final-diary-list" class="final-diary-list"></div>
+            <div class="final-pan-scene">
+              <div class="final-pan-actor" aria-hidden="true"></div>
+              <p>Pan de muerto final</p>
+            </div>
+          </div>
+          <button id="final-summary-button" type="button">Cerrar</button>
+        </div>
+      </div>
+      <div id="mini-game" hidden role="group" aria-labelledby="mini-game-title" aria-describedby="mini-game-prompt">
+        <div class="mini-game-card">
+          <h2 id="mini-game-title"></h2>
+          <p id="mini-game-prompt"></p>
+          <div class="mini-game-stats">
+            <span id="mini-game-combo">🔥 Racha: 0</span>
+            <span>✨ Puntos por buenas jugadas</span>
+          </div>
+          <div id="mini-game-progress" class="mini-game-progress" role="progressbar" aria-label="Progreso del minijuego" aria-valuemin="0" aria-valuenow="0" aria-valuemax="1">
+            <div class="mini-game-progress-track"><div id="mini-game-progress-fill"></div></div>
+            <span id="mini-game-progress-label"></span>
+          </div>
+          <div id="mini-game-board" hidden role="group" aria-label="Opciones del minijuego"></div>
+          <p id="mini-game-status" aria-live="polite"></p>
+          <button id="mini-game-hint-button" type="button">Canjear 15 chispas por una pista</button>
+          <button id="mini-game-cancel" type="button">Salir del reto</button>
+        </div>
+      </div>
+      <div id="cinematic" hidden role="region" aria-live="polite" aria-label="Cinemática de la historia">
+        <div class="cinematic-card">
+          <h2 id="cinematic-title"></h2>
+          <p id="cinematic-text"></p>
+          <button id="cinematic-button" type="button"></button>
+        </div>
+      </div>
+    </div>
+    <aside class="diary-panel" aria-live="polite">
+      <div class="diary-header">
+        <h3>Diario de Alex</h3>
+        <span id="diary-badge">0/8</span>
+      </div>
+      <div id="diary-pages"></div>
+      <div class="bread-collection" id="bread-collection" aria-label="Trozos de pan de muerto"></div>
+      <div class="reward-strip">
+        <h4>Premios</h4>
+        <div id="reward-list"></div>
+      </div>
+      <button id="eat-pan-button" type="button" hidden>Comer pan de muerto</button>
+    </aside>
+    <section aria-live="polite">
+      <h2 id="mission"></h2>
+      <p id="description"></p>
+    </section>
+    <div class="touch" role="group" aria-label="Controles táctiles para celular o tablet">
+      <div class="touch-pad" role="group" aria-label="Direcciones">
+        <button data-key="ArrowUp" aria-label="Arriba">↑</button>
+        <button data-key="ArrowLeft" aria-label="Izquierda">←</button>
+        <button data-key="ArrowDown" aria-label="Abajo">↓</button>
+        <button data-key="ArrowRight" aria-label="Derecha">→</button>
+      </div>
+      <button class="touch-action" data-key="interact" aria-label="Hablar o realizar acción">Hablar / acción</button>
+    </div>
+    <footer>Moverse: <kbd>WASD</kbd> o <kbd>flechas</kbd> · Usa <kbd>E</kbd> para actuar · Cada minijuego tiene una mecánica distinta: toca sus elementos o sigue sus instrucciones · Cruza los marcadores caminando</footer>
+  </main>
+  <div id="dialog" hidden role="dialog" aria-modal="true" aria-labelledby="dialog-title">
+    <div class="card">
+      <h2 id="dialog-title"></h2>
+      <p id="dialog-text"></p>
+      <div id="choices" hidden></div>
+      <button id="dialog-button">Continuar</button>
+      <p id="share-status" hidden aria-live="polite"></p>
+    </div>
+  </div>
+  <script>
+    (() => {
+      const canvas = document.querySelector("#game");
+      const ctx = canvas.getContext("2d");
+      const titleScreen = document.querySelector("#title-screen");
+      const playButton = document.querySelector("#play-button");
+      const gameShell = document.querySelector("#game-shell");
+      const mission = document.querySelector("#mission");
+      const description = document.querySelector("#description");
+      const progress = document.querySelector("#progress");
+      const sparkScoreBadge = document.querySelector("#spark-score");
+      const diaryBadge = document.querySelector("#diary-badge");
+      const diaryPages = document.querySelector("#diary-pages");
+      const breadCollection = document.querySelector("#bread-collection");
+      const rewardList = document.querySelector("#reward-list");
+      const eatPanButton = document.querySelector("#eat-pan-button");
+      const dialog = document.querySelector("#dialog");
+      const dialogTitle = document.querySelector("#dialog-title");
+      const dialogText = document.querySelector("#dialog-text");
+      const dialogButton = document.querySelector("#dialog-button");
+      const choices = document.querySelector("#choices");
+      const shareButton = document.querySelector("#share");
+      const shareStatus = document.querySelector("#share-status");
+      const actionToast = document.querySelector("#action-toast");
+      const rewardBurst = document.querySelector("#reward-burst");
+      const rewardOverlay = document.querySelector("#reward-overlay");
+      const rewardOverlayButton = document.querySelector("#reward-overlay-button");
+      const finalSummary = document.querySelector("#final-summary");
+      const finalConfetti = document.querySelector("#final-confetti");
+      const finalSummaryMessage = document.querySelector("#final-summary-message");
+      const finalDiaryList = document.querySelector("#final-diary-list");
+      const finalSummaryButton = document.querySelector("#final-summary-button");
+      const cinematicPanel = document.querySelector("#cinematic");
+      const cinematicTitle = document.querySelector("#cinematic-title");
+      const cinematicText = document.querySelector("#cinematic-text");
+      const cinematicButton = document.querySelector("#cinematic-button");
+      const miniGamePanel = document.querySelector("#mini-game");
+      const miniGameTitle = document.querySelector("#mini-game-title");
+      const miniGamePrompt = document.querySelector("#mini-game-prompt");
+      const miniGameBoard = document.querySelector("#mini-game-board");
+      const miniGameStatus = document.querySelector("#mini-game-status");
+      const miniGameCombo = document.querySelector("#mini-game-combo");
+      const miniGameProgress = document.querySelector("#mini-game-progress");
+      const miniGameProgressFill = document.querySelector("#mini-game-progress-fill");
+      const miniGameProgressLabel = document.querySelector("#mini-game-progress-label");
+      const miniGameCard = document.querySelector(".mini-game-card");
+      const miniGameHintButton = document.querySelector("#mini-game-hint-button");
+      const miniGameCancel = document.querySelector("#mini-game-cancel");
+      const touchActionButton = document.querySelector(".touch-action");
+      const keys = new Set();
+      const player = { x: 120, y: 380, speed: 3.2 };
+      const startedTasks = new Set();
+      let actionProgress = 0;
+      let actionCompleted = new Set();
+      let pendingActionTarget = -1;
+      let toastTimer = 0;
+      let sparkScoreTimer = 0;
+      let sparkScore = 0;
+      let sparkCombo = 0;
+      let lastSparkAward = 0;
+      let rewardBurstTimer = 0;
+      let rewardOverlayTimer = 0;
+      let cinematic = null;
+      let gameStarted = false;
+      let activeMiniGame = null;
+      let lastRewardCount = 0;
+      const worlds = [
+        {
+          name: "La plaza de los acuerdos", color: "#9bc58e", sky: "#d9edc3", scenery: "town",
+          tasks: [
+            {
+              title: "Misión 1 · La plaza de todos", description: "Ayuda a Luna a decidir cómo organizar la asamblea para cuidar la plaza entre todos.",
+              character: "Luna, la panadera", x: 690, y: 345, icon: "✦",
+              assignment: "Ayúdame a organizar una asamblea vecinal. Tendrás que construir un plan justo: primero escuchar, luego acordar y finalmente repartir las tareas.",
+              action: {
+                kind: "community", name: "Prepara la asamblea", orderMatters: true, targets: [
+                  { x: 270, y: 350, icon: "🍂", label: "Recoger hojas para la plaza", npc: { name: "Ana, vecina", line: "Gracias por recogerlas. Me gustaría que la plaza tuviera sombra para leer.", reflection: { question: "¿Por qué conviene preguntar a distintas personas qué necesitan de la plaza?", options: ["Porque cada persona vive y usa el espacio de manera diferente", "Porque solo una opinión puede ser correcta"], answer: 0, insight: "Compartir un espacio no significa vivirlo igual. Escuchar necesidades distintas ayuda a construir acuerdos donde más personas puedan participar." } } },
+                  { x: 485, y: 455, icon: "🪑", label: "Colocar una silla para la asamblea", npc: { name: "Luis, vecino", line: "¡Qué bien! Así las personas mayores también tendrán dónde sentarse.", reflection: { question: "¿Qué hace que una decisión comunitaria sea más justa?", options: ["Considerar quiénes podrían quedar fuera", "Repartir todo sin escuchar a nadie"], answer: 0, insight: "La convivencia se construye con reglas y espacios que toman en cuenta que las personas tienen cuerpos, tiempos y necesidades diferentes." } } },
+                  { x: 590, y: 315, icon: "📋", label: "Anotar una propuesta", npc: { name: "Mila, vecina", line: "Yo puedo regar las plantas los martes. ¿Lo anotamos para acordar los turnos?" } },
+                  { x: 355, y: 465, icon: "🧹", label: "Dejar limpio el espacio", challenge: { title: "Limpieza compartida", prompt: "Al limpiar la plaza, ¿cómo conviene organizar el trabajo?", options: ["Separar los residuos y dejar libre el paso", "Amontonar todo frente a la entrada"], answer: 0, feedback: "Separar los residuos y dejar libres los caminos hace que la plaza sea más segura para todos." } },
+                  { x: 790, y: 385, icon: "🤝", label: "Acordar el plan entre todos", miniGame: { mode: "agenda", title: "Asamblea en orden", prompt: "La comunidad quiere que todos participen. Toca dos tarjetas para intercambiarlas y ordenar los pasos de un acuerdo justo.", cards: ["Repartir tareas", "Escuchar a todos", "Acordar una propuesta"], solution: ["Escuchar a todos", "Acordar una propuesta", "Repartir tareas"] }, feedback: "La asamblea llega a un acuerdo y cada vecino tiene un turno para participar." },
+                  { x: 160, y: 475, icon: "🗳️", label: "Repartir la voz en la asamblea", miniGame: { mode: "vote", title: "Una plaza para todos", prompt: "Hay cinco votos comunitarios. Reparte al menos uno a cada propuesta y decide entre todos qué cuidar primero.", votes: 5, proposals: ["🌳 Más sombra", "♿ Camino accesible", "📚 Rincón de lectura"] }, feedback: "Cada propuesta recibió una voz. El acuerdo comunitario nace al escuchar necesidades diversas." }
+                ]
+              },
+              story: "Luna lleva tu propuesta a la asamblea. Los vecinos comparten ideas, acuerdan turnarse para cuidar la plaza y dejan un espacio para reunirse. Luna sonríe: «Ahora este lugar también refleja las decisiones de quienes lo usamos».",
+              lesson: "Las instituciones y los acuerdos organizan la vida en común. La experiencia humana se forma con otras personas: al escuchar, negociar reglas y cuidar espacios compartidos podemos transformar nuestro entorno."
+            },
+            {
+              title: "Misión 2 · La receta de la memoria", description: "Teo te pide elegir cómo compartir la receta para que todos puedan participar.",
+              character: "Teo, el vecino", x: 410, y: 330, icon: "✿",
+              assignment: "Vamos a preparar la receta familiar. Reúne los ingredientes de la tradición y comparte el pan con el barrio.",
+              action: {
+                kind: "community", name: "Prepara la receta en comunidad", orderMatters: true, targets: [
+                  { x: 245, y: 445, icon: "📜", label: "Leer la receta", npc: { name: "Teo", line: "Primero necesitamos leer las instrucciones de mi abuela para no olvidar ningún paso.", reflection: { question: "¿Qué puede enseñarnos una receta heredada?", options: ["Conserva recuerdos y saberes que pasan entre generaciones", "Debe permanecer exactamente igual para siempre"], answer: 0, insight: "Las tradiciones transmiten conocimientos y pertenencia. Cada generación puede cuidarlas y también transformarlas al compartirlas." } } },
+                  { x: 575, y: 450, icon: "🌾", label: "Conseguir harina", npc: { name: "Inés, la molinera", line: "Esta harina viene del molino del barrio. La hacemos juntos desde hace generaciones." } },
+                  { x: 780, y: 345, icon: "🍎", label: "Elegir fruta de temporada", npc: { name: "Sol, la agricultora", line: "Estas manzanas son de la cosecha de hoy. En cada estación usamos lo que nos ofrece la tierra.", reflection: { question: "¿Por qué una misma receta puede cambiar de una comunidad a otra?", options: ["Cambian los ingredientes disponibles y las historias de cada familia", "Una de las comunidades necesariamente la prepara mal"], answer: 0, insight: "La cultura no es una lista idéntica para todos: las personas crean prácticas con los recursos, memorias y encuentros de su entorno." } } },
+                  { x: 280, y: 325, icon: "🥣", label: "Mezclar los ingredientes", npc: { name: "Teo", line: "¡La mezcla está lista! En mi familia, cocinar juntos siempre fue parte de la celebración." } },
+                  { x: 650, y: 320, icon: "🍞", label: "Compartir el pan y su historia", miniGame: { mode: "recipe", title: "La receta del barrio", prompt: "Elige los cuatro ingredientes de la receta familiar. Hay dos cosas que no van en la masa.", ingredients: [
+                    { id: "flour", label: "🌾 Harina" }, { id: "apple", label: "🍎 Manzana" },
+                    { id: "water", label: "💧 Agua" }, { id: "yeast", label: "🫧 Levadura" },
+                    { id: "stone", label: "🪨 Piedra" }, { id: "soap", label: "🧼 Jabón" }
+                  ], solution: ["flour", "apple", "water", "yeast"] }, feedback: "El pan queda listo y la receta puede viajar a otras familias." },
+                  { x: 850, y: 465, icon: "🎨", label: "Crear un mural para recordar la receta", miniGame: { mode: "mural", title: "El mural de la cosecha", prompt: "Pinta el mosaico para representar la manzana rodeada de hojas. Toca cada casilla para cambiar su dibujo.", palette: ["·", "🍎", "🍃"], solution: [2, 1, 2, 1, 1, 1, 2, 1, 2] }, feedback: "El mural guarda la receta como una memoria compartida del barrio." }
+                ]
+              },
+              story: "Teo conserva la receta de pan de su abuela. Cada año la prepara con sus vecinos y cada familia agrega algo propio. «La tradición cambia un poquito con cada persona que la comparte», te cuenta.",
+              lesson: "Las costumbres conectan generaciones y grupos. La cultura ofrece recuerdos y saberes compartidos, pero no es idéntica ni inmóvil: cambia cuando personas diferentes la practican y le dan nuevos sentidos."
+            }
+          ]
+        },
+        {
+          name: "El bosque de las posibilidades", color: "#6b9f82", sky: "#bedfd0", scenery: "forest",
+          tasks: [
+            {
+              title: "Misión 3 · El rastro misterioso", description: "Nico vio huellas junto al río. Ayúdalo a separar lo que vio de lo que imaginó.",
+              character: "Nico, el cuentacuentos", x: 700, y: 365, icon: "⌕",
+              assignment: "Nico encontró pistas extrañas. Ayúdalo a clasificarlas como observaciones o imaginaciones y arma una explicación cuidadosa.",
+              action: {
+                kind: "investigate", name: "Investiga el sendero", orderMatters: false, targets: [
+                  { x: 250, y: 350, icon: "⌕", label: "Examinar la huella", npc: { name: "Nico, el cuentacuentos", line: "La huella es grande y está húmeda. Eso sí puedo describirlo; quién la dejó todavía no lo sé.", reflection: { question: "¿Cuál de estas frases distingue mejor una prueba de una explicación?", options: ["La huella está húmeda; aún no sé quién la hizo", "Un monstruo invisible pasó por aquí"], answer: 0, insight: "Observar es describir señales disponibles. Imaginar una causa puede ser creativo, pero hace falta evidencia para afirmarla como un hecho." } } },
+                  { x: 470, y: 445, icon: "♧", label: "Observar la hoja", npc: { name: "Vera, aprendiz de botánica", line: "La hoja tiene pequeños agujeros. Podemos registrar eso sin saber aún qué los produjo.", reflection: { question: "Si todavía no sabemos qué hizo los agujeros, ¿qué sería más cuidadoso decir?", options: ["Veo agujeros; podría investigar qué los hizo", "Sé con seguridad que fue un animal mágico"], answer: 0, insight: "La curiosidad puede abrir muchas explicaciones posibles. La realidad se investiga comparándolas con observaciones y nuevas pruebas." } } },
+                  { x: 830, y: 380, icon: "≈", label: "Mirar junto al río" },
+                  { x: 350, y: 405, icon: "🪶", label: "Buscar una pluma" },
+                  { x: 585, y: 330, icon: "☁", label: "Comparar las pistas", miniGame: { mode: "classify", title: "Detective de lo real", prompt: "Clasifica cada pista: ¿es algo que puedes observar o una idea imaginada?", rounds: [
+                    { item: "👣 Huella húmeda", question: "¿Qué tipo de pista es?", options: ["Observación", "Imaginación"], answer: 0, feedback: "La huella y su humedad se pueden observar." },
+                    { item: "🐉 Dragón invisible", question: "¿Qué tipo de pista es?", options: ["Observación", "Imaginación"], answer: 1, feedback: "El dragón es una idea del cuento, no una pista comprobada." },
+                    { item: "💭 «El dragón dejó la huella»", question: "¿Qué tipo de explicación es?", options: ["Hecho observado", "Posibilidad imaginada"], answer: 1, feedback: "La huella existe; quién la dejó todavía es una pregunta." }
+                  ] }, feedback: "¡Caso resuelto! Las pistas quedan registradas sin confundir lo observado con lo imaginado." }
+                ]
+              },
+              wrapUp: {
+                prompt: "Después de observar las pistas, ¿qué puedes afirmar con seguridad?",
+                options: ["Encontré una huella; todavía no sé quién la dejó", "Un dragón invisible dejó la huella"],
+                answer: 0,
+                feedback: "Exacto: describiste la evidencia sin confundirla con una explicación imaginada."
+              },
+              story: "Nico encontró una huella grande y húmeda cerca del río: eso pudo observarlo. Cree que pertenece a un dragón invisible. «¡Esa parte la inventé para que el cuento dé emoción!», admite.",
+              lesson: "Una observación puede apoyarse en evidencias; una explicación imaginada es una posibilidad, no un hecho confirmado. La imaginación ayuda a formular preguntas, mientras que investigar nos permite contrastarlas con el mundo."
+            },
+            {
+              title: "Misión 4 · Un final por inventar", description: "Alma te encarga inventar un final para su cuento y elegir qué hacer con la idea.",
+              character: "Alma, la ilustradora", x: 420, y: 325, icon: "✧",
+              assignment: "Alma tiene el comienzo de un cuento, pero no el final. Imagina un árbol que guarda recuerdos y dibuja su constelación.",
+              action: {
+                kind: "imagine", name: "Crea escenas para el cuento", orderMatters: true, targets: [
+                  { x: 230, y: 430, icon: "✦", label: "Descubrir la melodía" },
+                  { x: 700, y: 350, icon: "✧", label: "Encontrar el claro" },
+                  { x: 820, y: 450, icon: "❋", label: "Dejar un recuerdo" },
+                  { x: 330, y: 335, icon: "🎨", label: "Dibujar una escena", npc: { name: "Alma, la ilustradora", line: "En un cuento, un árbol puede guardar recuerdos. En la vida real, los árboles no cuentan historias como nosotros, aunque sí podemos estudiar cómo viven.", reflection: { question: "¿Qué nos permite hacer la imaginación?", options: ["Probar posibilidades en historias sin confundirlas con hechos", "Demostrar que todo lo imaginado ocurre realmente"], answer: 0, insight: "Imaginar es una capacidad humana para crear símbolos, relatos y futuros posibles. Una ficción puede expresar una verdad emocional sin ser un hecho literal." } } },
+                  { x: 590, y: 450, icon: "🎵", label: "Seguir la melodía", miniGame: { mode: "constellation", title: "La constelación del cuento", prompt: "Une las estrellas para dibujar el árbol imaginario que guarda recuerdos. Toca las estrellas en el orden indicado.", nodes: [{ x: 12, y: 57 }, { x: 30, y: 29 }, { x: 49, y: 57 }, { x: 68, y: 27 }, { x: 88, y: 57 }], solution: [2, 0, 3, 1, 4] }, feedback: "Cada visitante puede añadir un recuerdo y transformar el final del cuento." },
+                  { x: 850, y: 350, icon: "📖", label: "Inventar otro final con Alma", npc: { name: "Alma, la ilustradora", line: "¡Qué bonito quedó el árbol! Ahora inventemos una escena nueva: una viajera, una isla y una semilla luminosa.", reflection: { question: "¿Qué necesitamos para crear un final imaginario?", options: ["Combinar ideas y darles un sentido en una historia", "Afirmar que todo lo narrado ocurrió de verdad"], answer: 0, insight: "La imaginación combina elementos conocidos para construir mundos posibles. Un cuento puede emocionarnos y enseñarnos aunque sus personajes sean inventados." } } },
+                  { x: 850, y: 450, icon: "📖", label: "Escribir la escena que imaginamos", miniGame: { mode: "storyecho", title: "El eco del cuento", prompt: "Observa la secuencia de imágenes de Alma y repítela en el mismo orden para descubrir el final.", symbols: [
+                    { icon: "🌙", label: "la noche" },
+                    { icon: "🌳", label: "el árbol de recuerdos" },
+                    { icon: "🦊", label: "el zorro curioso" },
+                    { icon: "🌱", label: "la semilla luminosa" },
+                    { icon: "✨", label: "el nuevo comienzo" }
+                  ], sequence: [0, 2, 1, 3, 4] }, feedback: "¡El cuento está creado! Al combinar imágenes conocidas en un orden nuevo, la imaginación construye posibilidades." }
+                ]
+              },
+              wrapUp: {
+                prompt: "¿Qué final reúne mejor las escenas que construiste con Alma?",
+                options: ["Alex deja un recuerdo para que otra persona continúe la historia", "Alex borra el cuento y evita que alguien lo imagine"],
+                answer: 0,
+                feedback: "Tu final transforma la imaginación y los recuerdos en una historia compartida."
+              },
+              story: "Alma dibuja un bosque donde los árboles pueden hablar, pero aún no sabe cómo termina el cuento. Te propone imaginarlo: «¿Y si los árboles guardaran recuerdos de quienes los visitan?». Juntos crean un final nuevo.",
+              lesson: "La imaginación permite ensayar ideas, crear símbolos e inventar historias. No es lo contrario de la realidad: una historia puede ser ficticia y aun así ayudarnos a expresar emociones o imaginar futuros posibles, sin presentarlos como hechos."
+            }
+          ]
+        },
+        {
+          name: "El puerto de las voces", color: "#d5a469", sky: "#f6d8a6", scenery: "harbor",
+          tasks: [
+            {
+              title: "Misión 5 · Un barco, dos sentimientos", description: "Sam y Mara no se ponen de acuerdo sobre cuándo zarpar. Escucha a Sam.",
+              character: "Sam, el aprendiz", x: 690, y: 350, icon: "♡",
+              assignment: "Sam está preocupado, pero no encuentra las palabras. Descubre cómo se relacionan las pistas de su carta con sus sentimientos y acompáñalo.",
+              action: {
+                kind: "empathy", name: "Escucha a Sam", orderMatters: true, targets: [
+                  { x: 300, y: 440, icon: "🪢", label: "Recoger una cuerda para el barco", feedback: "Guardaste la cuerda sin interrumpir a Sam." },
+                  { x: 520, y: 350, icon: "☁", label: "Escuchar su preocupación", npc: { name: "Sam, el aprendiz", line: "Me preocupa que mi familia espere demasiado. También quiero que el viaje sea seguro.", reflection: { question: "¿Por qué dos personas pueden sentir algo distinto ante el mismo viaje?", options: ["Cada quien tiene recuerdos, necesidades y experiencias propias", "Una de las dos personas está fingiendo necesariamente"], answer: 0, insight: "La experiencia humana es situada: lo que vivimos antes y lo que necesitamos influye en cómo sentimos una situación. Escuchar no exige sentir lo mismo." } } },
+                  { x: 820, y: 370, icon: "✉", label: "Leer la carta de su familia", miniGame: { mode: "match", title: "Pistas y sentimientos", prompt: "Destapa las cartas y encuentra qué sentimiento puede relacionarse con cada experiencia.", pairs: [
+                    { id: "family", icon: "✉️", text: "Extraña a su familia" },
+                    { id: "family", icon: "💌", text: "Siente añoranza" },
+                    { id: "safety", icon: "⛈️", text: "El viaje puede ser inseguro" },
+                    { id: "safety", icon: "🧭", text: "Siente preocupación" },
+                    { id: "listening", icon: "👂", text: "Mara escucha con calma" },
+                    { id: "listening", icon: "🤝", text: "Sam se siente acompañado" }
+                  ] }, feedback: "¡Encontraste las conexiones! Las pistas ayudan a comprender lo que Sam podría estar sintiendo." },
+                  { x: 370, y: 335, icon: "♡", label: "Reconocer lo que siente", npc: { name: "Mara, la navegante", line: "Sam está nervioso, no enfadado. Podemos escucharle y revisar el barco juntos.", reflection: { question: "¿Cómo acompañas a alguien sin decidir por esa persona lo que siente?", options: ["Pregunto y escucho cómo lo vive", "Le digo que su emoción no tiene sentido"], answer: 0, insight: "La empatía no consiste en adivinar perfectamente ni en borrar las diferencias. Consiste en escuchar y dejar que la otra persona explique su experiencia." } } },
+                  { x: 610, y: 455, icon: "🧭", label: "Marcar en el mapa dónde reunirse", challenge: { title: "Ayuda a Sam", prompt: "¿Qué podrías decirle a Sam después de escuchar por qué tiene prisa?", options: ["Entiendo que extrañes a tu familia; pensemos juntos cómo avisarles", "No deberías sentirte así, deja de preocuparte"], answer: 0, feedback: "Reconocer su preocupación abre una conversación sin decirle qué debe sentir." } }
+                ]
+              },
+              story: "Sam mira el barco preocupado: «Si esperamos, temo perder la oportunidad. Mi familia me espera al otro lado». No está enfadado con Mara; está nervioso porque el viaje es importante para él.",
+              lesson: "Reconocer lo que siente alguien ayuda a comprender sus acciones sin juzgarlas de inmediato. Cada persona interpreta lo que vive desde su historia; escuchar con empatía no significa sentir exactamente lo mismo."
+            },
+            {
+              title: "Misión 6 · Un plan para zarpar", description: "Mara te pide proponer un plan que tome en cuenta las preocupaciones de Sam y las suyas.",
+              character: "Mara, la navegante", x: 430, y: 335, icon: "⚓",
+              assignment: "El barco aún no está listo. Organiza los preparativos de seguridad y negocia un plan que considere tanto la prisa de Sam como la preocupación de Mara.",
+              action: {
+                kind: "navigate", name: "Prepara y prueba la ruta", orderMatters: true, targets: [
+                  { x: 260, y: 365, icon: "⚓", label: "Navegar hasta el primer marcador", auto: true },
+                  { x: 680, y: 350, icon: "◉", label: "Cruzar la boya de seguridad", auto: true },
+                  { x: 815, y: 430, icon: "🪢", label: "Ajustar las cuerdas del barco", npc: { name: "Sam, el aprendiz", line: "Con la cuerda firme, siento que puedo aportar al viaje y cuidar a quienes van conmigo.", reflection: { question: "¿Qué puede cambiar cuando una persona participa en una tarea compartida?", options: ["Puede sentirse parte del grupo y asumir responsabilidades", "Deja de tener opiniones o necesidades propias"], answer: 0, insight: "Las personas construimos pertenencia haciendo cosas con otros, pero participar no significa perder nuestra voz individual." } } },
+                  { x: 530, y: 410, icon: "🧭", label: "Trazar una ruta alternativa", npc: { name: "Mara, la navegante", line: "Si el viento cambia, podemos tomar esta ruta protegida. ¿La marcamos en el mapa?", reflection: { question: "¿Qué demuestra el plan que preparaste con Sam?", options: ["Se puede negociar atendiendo a más de una necesidad", "Para convivir, todos deben pensar y sentir igual"], answer: 0, insight: "La vida en común no elimina los desacuerdos. Dialogar permite crear respuestas compartidas y mantener visibles las necesidades distintas." } } },
+                  { x: 330, y: 370, icon: "🔔", label: "Avisar a Sam que el barco está listo", miniGame: { mode: "route", title: "Traza una ruta segura", prompt: "Guía el barco hasta el puerto sin tocar las rocas. Toca una casilla vecina o usa las flechas.", rows: 4, columns: 4, start: 12, goal: 3, blocked: [5, 6, 9] }, feedback: "Sam recibe el aviso y el barco zarpa por una ruta revisada por todos." }
+                ]
+              },
+              story: "Mara explica: «Quería revisar el barco con calma antes de salir; para mí la seguridad también importa». Tras escucharse, Sam y Mara acuerdan revisar juntos las provisiones y zarpar cuando estén listos.",
+              lesson: "Escuchar experiencias distintas permite crear soluciones compartidas sin fingir que todos sienten lo mismo. La convivencia humana requiere diálogo, acuerdos y espacio para que cada voz conserve su perspectiva."
+            }
+          ]
+        },
+        {
+          name: "El valle de los seres vivos", color: "#8eae87", sky: "#d8edf2", scenery: "valley",
+          tasks: [
+            {
+              title: "Misión 7 · El arroyo necesita ayuda", description: "Ayuda a Iris a cuidar el arroyo y a los seres que dependen de su agua limpia y sus orillas.",
+              character: "Iris, la guardabosques", x: 690, y: 350, icon: "≈",
+              assignment: "Una tormenta cambió el arroyo. Analiza cómo se relacionan el agua, las plantas, los animales y las personas, y arma una respuesta que ayude sin dañar la orilla.",
+              action: {
+                kind: "ecology", name: "Restaura el paso del agua", orderMatters: true, targets: [
+                  { x: 290, y: 400, icon: "🔎", label: "Seguir el recorrido del arroyo", feedback: "Encontraste dónde se estrecha el cauce." },
+                  { x: 490, y: 455, icon: "🪵", label: "Mover una rama sin pisar la orilla", npc: { name: "Iris, la guardabosques", line: "Retiremos solo la rama que bloquea el paso. La madera que queda puede servir de refugio y alimento a otros seres.", reflection: { question: "¿Qué significa restaurar un ecosistema con cuidado?", options: ["Resolver el problema y conservar los refugios y relaciones de vida", "Dejar el lugar completamente vacío para que nada vuelva a crecer"], answer: 0, insight: "Cuidar no es controlar cada parte de la naturaleza. Conviene intervenir lo necesario, reducir el daño y permitir que las relaciones entre especies continúen." } } },
+                  { x: 625, y: 380, icon: "🐸", label: "Observar a la rana desde lejos", npc: { name: "Iris, la guardabosques", line: "La rana necesita agua limpia y plantas donde esconderse. Observémosla sin acercarnos demasiado.", reflection: { question: "¿Qué nos enseña la presencia de la rana junto al arroyo?", options: ["La vida humana también depende de ecosistemas compartidos", "Los animales y las plantas solo importan cuando nos sirven"], answer: 0, insight: "Los humanos somos seres vivos dentro de redes ecológicas. El agua, las plantas, los animales y nosotros dependemos de relaciones que no controlamos por completo." } } },
+                  { x: 340, y: 335, icon: "🐾", label: "Comparar las huellas junto al agua", npc: { name: "Noé, cuidador del valle", line: "Estas huellas muestran que el arroyo es una ruta y una fuente de agua para otros animales. Lo que hacemos aquí también puede afectar a quienes viven río abajo.", reflection: { question: "¿Cómo podemos cuidar un lugar conectado con otros ecosistemas?", options: ["Evitar contaminar el agua y reducir el daño a los hábitats", "Pensar que nuestras acciones solo afectan el sitio donde estamos"], answer: 0, insight: "El agua y los seres vivos conectan distintos lugares. Evitar residuos y sustancias contaminantes protege también a las comunidades y especies que viven río abajo." } } },
+                  { x: 790, y: 440, icon: "🌱", label: "Replantar una especie de la orilla", npc: { name: "Iris, la guardabosques", line: "Plantemos una especie nativa: sus raíces ayudan a sostener el suelo y sus flores pueden alimentar a insectos locales.", reflection: { question: "¿Por qué conviene recuperar plantas propias de este lugar?", options: ["Porque sostienen el suelo y ofrecen alimento y refugio a especies locales", "Porque así podemos reemplazar toda la diversidad por una sola planta"], answer: 0, insight: "La diversidad hace que un ecosistema tenga más relaciones de vida. Restaurar plantas nativas puede ayudar a recuperar hábitats sin convertirlos en espacios uniformes." } } },
+                  { x: 530, y: 320, icon: "💧", label: "Comprobar que el agua fluye", miniGame: { mode: "pipes", title: "Repara el cauce", prompt: "Toca los codos del canal para girarlos y conectar el manantial con el arroyo. ¡No hay que romper la orilla!", rows: 3, columns: 3, tiles: [
+                    "empty", "corner", "empty",
+                    "source", "corner", "empty",
+                    "empty", "corner", "target"
+                  ], rotations: [0, 0, 0, 0, 0, 0, 0, 1, 0                  ] }, feedback: "¡Arroyo protegido! El agua limpia y las orillas con plantas sostienen una red de vida que también llega río abajo." }
+                ]
+              },
+              story: "Una rama caída bloquea parte del arroyo. Alex e Iris despejan solo el paso necesario, dejan madera que puede servir de refugio y plantan especies nativas para sostener la orilla. Noé recuerda que el agua continúa río abajo, conectando a otras comunidades y seres vivos.",
+              lesson: "Los seres humanos formamos parte de ecosistemas conectados: dependemos del agua y de la diversidad de plantas y animales. Evitar la contaminación, proteger las orillas y restaurar plantas nativas ayuda a conservar hábitats río arriba y río abajo."
+            },
+            {
+              title: "Misión 8 · Un hogar compartido", description: "Ayuda a cuidar el hábitat del zorro y descubre cómo las personas podemos convivir con los ecosistemas.",
+              character: "Iris y el zorro", x: 425, y: 325, icon: "❋",
+              assignment: "Iris necesita registrar al zorro sin invadir su refugio. Diseña una observación respetuosa y piensa cómo el ruido, la basura y la pérdida de vegetación pueden afectar a todo su hábitat.",
+              action: {
+                kind: "observe", name: "Observa al zorro con respeto", orderMatters: true, targets: [
+                  { x: 230, y: 430, icon: "🔭", label: "Elegir un punto de observación lejano", npc: { name: "Iris, la guardabosques", line: "Desde este sendero podemos observar el refugio sin bloquear la salida. Si además mantenemos bajo el ruido y no dejamos basura, reducimos el impacto en el bosque.", reflection: { question: "¿Qué diferencia hay entre observar a otro ser y apropiarse de su experiencia?", options: ["Observar con cuidado implica distancia y reconocer lo que no sabemos", "Mirarlo nos permite conocer exactamente todos sus pensamientos"], answer: 0, insight: "Podemos aprender de señales y comportamientos, pero no debemos dar por hecho que la experiencia interna de otro animal es igual a la humana. Respetar también es reducir las molestias que causamos en su hábitat." } } },
+                  { x: 650, y: 450, icon: "👀", label: "Esperar a que el zorro salga por sí solo", npc: { name: "Iris, la guardabosques", line: "Esperar en silencio deja que el zorro decida cuándo salir. Si quienes visitamos el bosque nos mantenemos en los senderos y nos llevamos nuestros residuos, también cuidamos a las plantas y animales que viven aquí.", reflection: { question: "¿Por qué dejamos que el zorro se acerque por sí mismo?", options: ["Porque tiene necesidades y ritmos propios, y compartimos su ecosistema", "Para obligarlo a actuar como un personaje de nuestro cuento"], answer: 0, insight: "Los animales no son accesorios de una aventura humana. Mantener distancia, respetar los senderos y no dejar residuos son acciones sencillas que ayudan a proteger todo su hábitat." } } },
+                  { x: 800, y: 350, icon: "📝", label: "Anotar lo que hace sin inventar detalles", feedback: "Anotaste solo lo que pudiste observar." },
+                  { x: 320, y: 340, icon: "👣", label: "Comparar sus huellas desde el sendero", feedback: "Las huellas muestran por dónde pasó, pero no hace falta seguirlo." },
+                  { x: 570, y: 385, icon: "🍃", label: "Dejar intacto su entorno y retirarse", miniGame: { mode: "fieldnotes", title: "Diario de campo", prompt: "Toca las tres pistas que Alex puede observar desde lejos. Evita inventar detalles o acercarte al refugio.", clues: [
+                    { id: "paw", label: "👣 Huellas junto al arroyo", needed: true },
+                    { id: "leaf", label: "🍃 Hojas movidas cerca del sendero", needed: true },
+                    { id: "den", label: "🦊 Entrada del refugio a la distancia", needed: true },
+                    { id: "thought", label: "💭 Lo que el zorro está pensando", needed: false },
+                    { id: "chase", label: "🏃 Perseguirlo para verlo mejor", needed: false },
+                    { id: "litter", label: "🗑️ Dejar residuos en el sendero", needed: false },
+                    { id: "dragon", label: "🐉 Un dragón invisible detrás del árbol", needed: false }
+                  ] }, feedback: "¡Diario de campo completo! Alex observó con curiosidad y dejó tranquilo el hogar del zorro." },
+                  { x: 835, y: 465, icon: "🏡", label: "Preparar un rincón seguro para observar", miniGame: { mode: "habitat", title: "Un hogar sin invadir", prompt: "Cuida las conexiones del hábitat: refugio bajo los árboles, agua limpia junto al arroyo y plantas nativas en la orilla. Mantén libre el paso de la fauna.", cells: ["🌳 Árboles", "🌊 Arroyo", "🌿 Orilla", "🪨 Rocas", "🍂 Claro", "🛤️ Sendero", "🌱 Brotes", "🪵 Troncos", "🌾 Pasto"], items: [
+                    { id: "den", icon: "🦊", label: "🦊 Refugio", slot: 0 },
+                    { id: "water", icon: "💧", label: "💧 Agua limpia", slot: 1 },
+                    { id: "plants", icon: "🌱", label: "🌱 Plantas nativas", slot: 2 }
+                  ] }, feedback: "Protegiste refugio, agua y vegetación: elementos conectados que permiten que el ecosistema siga sosteniendo la vida." }
+                ]
+              },
+              story: "El zorro vuelve al refugio del bosque mientras Iris observa desde lejos. El grupo se lleva sus residuos, mantiene libre el sendero y deja intactos el agua y las plantas. Alex reúne la última página: «Las personas somos parte de la naturaleza. Nuestras decisiones pueden dañar o cuidar los hogares que compartimos con otros seres».",
+              lesson: "La experiencia humana se forma en relación con otras personas, la cultura y los ecosistemas. Respetar a otros seres también significa cuidar sus hábitats: mantener limpios el agua y los senderos, proteger la vegetación y observar sin invadir. Podemos aprender de los animales sin afirmar que conocemos sus pensamientos como si fueran humanos."
+            }
+          ]
+        }
+      ];
+      let worldIndex = 0;
+      let taskIndex = 0;
+      let dialogStage = "";
+      let finished = false;
+      let previousTime = 0;
+
+      const totalTasks = worlds.reduce((total, world) => total + world.tasks.length, 0);
+      const rewardCatalog = [
+        { unlock: 1, icon: "📄", name: "Primera página" },
+        { unlock: 2, icon: "🧩", name: "Pistas reunidas" },
+        { unlock: 4, icon: "🏹", name: "Mapa del viaje" },
+        { unlock: 6, icon: "🦊", name: "Amigo observador" },
+        { unlock: 8, icon: "📖", name: "Diario completo" }
+      ];
+
+      const cinematicScenes = {
+        1: {
+          fromWorld: 0, toWorld: 1, emblem: "🍞", title: "Una receta que sigue viajando",
+          text: "Teo reparte el pan y escribe la receta de su abuela en el cuaderno de Alex. Cada familia añade su propia idea; la tradición no se queda quieta: pasa de mano en mano y cambia con quienes la comparten. Entre las páginas aparece un sendero hacia el bosque.",
+          button: "Seguir el sendero"
+        },
+        3: {
+          fromWorld: 1, toWorld: 2, emblem: "✧", title: "Una historia abre otro camino",
+          text: "Alma termina el cuento: los árboles guardan recuerdos, pero cada visitante imagina algo distinto. Alex comprende que imaginar no es confundir una idea con un hecho; es explorar lo que podría ser. Una melodía lo guía desde el bosque hasta el puerto.",
+          button: "Seguir la melodía"
+        },
+        5: {
+          fromWorld: 2, toWorld: 3, emblem: "⛵", title: "Zarpar después de escucharse",
+          text: "Sam y Mara revisan juntos las cuerdas, las provisiones y la ruta protegida. Sam avisa a su familia y Mara espera a que el barco esté seguro. Al amanecer parten de acuerdo, no porque sientan lo mismo, sino porque tomaron en cuenta las preocupaciones de ambos. Al otro lado los espera un valle lleno de vida.",
+          button: "Llegar al valle"
+        },
+        7: {
+          fromWorld: 3, toWorld: -1, emblem: "📖", title: "El diario encuentra su última página",
+          text: "El zorro vuelve tranquilo a su refugio. Alex cierra el cuaderno y repasa el viaje: los acuerdos hacen posible convivir; las tradiciones unen generaciones; la imaginación abre posibilidades; escuchar permite comprender otras experiencias; y el arroyo, la rana y el zorro recuerdan que compartimos el mundo con otros seres. Ser humano también es cuidar ese mundo común.",
+          button: "Ver el final del viaje"
+        }
+      };
+
+      function currentTask() {
+        return worlds[worldIndex].tasks[taskIndex];
+      }
+
+      function completedTaskCount() {
+        return worlds.slice(0, worldIndex).reduce((total, world) => total + world.tasks.length, 0) + taskIndex;
+      }
+
+      function currentActionTarget(task) {
+        return task.action.orderMatters
+          ? actionProgress
+          : task.action.targets.findIndex((target, index) => !actionCompleted.has(index));
+      }
+
+      function isAutoTarget(task, target) {
+        return target.auto ?? task.action.auto ?? false;
+      }
+
+      function renderDiary() {
+        const completed = finished || (cinematic && cinematic.toWorld < 0) ? totalTasks : completedTaskCount();
+        const cappedCompleted = Math.min(Math.max(completed, 0), totalTasks);
+        const unlockedReward = rewardCatalog
+          .slice()
+          .reverse()
+          .find(reward => cappedCompleted >= reward.unlock && lastRewardCount < reward.unlock);
+
+        if (cappedCompleted > lastRewardCount && cappedCompleted > 0) {
+          const rewardLabel = unlockedReward ? unlockedReward.name : `Pan de muerto ${cappedCompleted}/${totalTasks}`;
+          const rewardIcon = unlockedReward ? unlockedReward.icon : "🍞";
+          showRewardBurst(rewardIcon, rewardLabel);
+          showBreadAnnouncement(cappedCompleted, totalTasks, rewardLabel);
+
+          if (cappedCompleted >= totalTasks) {
+            showRewardOverlay("🎉", "¡Has ganado!", "Completaste todas las misiones y te llevas el pan de muerto final. ¡La aventura termina con una celebración!.");
+          } else if (unlockedReward) {
+            showRewardOverlay(rewardIcon, "¡Premio conseguido!", `Has desbloqueado ${rewardLabel}. Sigue avanzando para completar el diario.`);
+          }
+        }
+        lastRewardCount = cappedCompleted;
+
+        const entries = worlds.flatMap((world, worldIndexValue) => world.tasks.map((task, taskIndexValue) => ({
+          task,
+          worldName: world.name,
+          index: worlds.slice(0, worldIndexValue).reduce((sum, currentWorld) => sum + currentWorld.tasks.length, 0) + taskIndexValue
+        })));
+
+        diaryBadge.textContent = `${Math.min(completed, totalTasks)}/${totalTasks}`;
+        diaryPages.replaceChildren();
+        entries.forEach((entry, index) => {
+          const page = document.createElement("div");
+          page.className = `diary-page ${index < completed ? "done" : index === completed && !finished ? "current" : ""}`.trim();
+          const icon = document.createElement("span");
+          icon.className = "diary-icon";
+          icon.textContent = index < completed ? "📖" : index === completed && !finished ? "📝" : "📄";
+          const text = document.createElement("div");
+          const title = document.createElement("strong");
+          title.textContent = entry.task.title;
+          const meta = document.createElement("span");
+          meta.textContent = index < completed ? "Página guardada" : index === completed && !finished ? "Página actual" : "Por descubrir";
+          text.append(title, meta);
+          page.append(icon, text);
+          diaryPages.append(page);
+        });
+
+        breadCollection.replaceChildren();
+        for (let piece = 0; piece < totalTasks; piece++) {
+          const bread = document.createElement("span");
+          bread.className = `bread-piece${piece < completed ? " unlocked" : ""}`;
+          bread.textContent = "🍞";
+          bread.title = piece < completed ? "Trozo de pan de muerto conseguido" : "Te faltan más misiones";
+          breadCollection.append(bread);
+        }
+
+        rewardList.replaceChildren();
+        rewardCatalog.forEach(reward => {
+          const item = document.createElement("div");
+          item.className = `reward-item${completed >= reward.unlock ? " unlocked" : ""}`;
+          item.textContent = `${reward.icon} ${reward.name}`;
+          rewardList.append(item);
+        });
+
+        eatPanButton.hidden = completed < totalTasks;
+      }
+
+      function updateHud() {
+        const task = currentTask();
+        const completed = finished || (cinematic && cinematic.toWorld < 0) ? totalTasks : completedTaskCount();
+        mission.textContent = finished ? "¡Viaje completado!" : cinematic ? cinematic.title : task.title;
+        description.textContent = finished
+          ? "Alex recuperó las páginas del diario: convivencia, cultura, imaginación, empatía y naturaleza."
+          : cinematic
+            ? cinematic.text
+            : `${worlds[worldIndex].name} · ${task.description}${startedTasks.has(completedTaskCount()) ? ` · Acción: ${actionProgress}/${task.action.targets.length}${actionProgress < task.action.targets.length ? ` · ${task.action.targets[currentActionTarget(task)].label}` : ` · Vuelve con ${task.character}`}` : ""}`;
+        progress.textContent = `${completed} / ${totalTasks} misiones · ${"✦ ".repeat(completed)}${"○ ".repeat(totalTasks - completed)}`;
+        renderDiary();
+      }
+
+      function showDialog(title, text, stage, buttonText = "Continuar") {
+        dialogTitle.textContent = title;
+        dialogText.textContent = text;
+        dialogButton.textContent = buttonText;
+        dialogButton.hidden = false;
+        choices.hidden = true;
+        choices.replaceChildren();
+        dialogStage = stage;
+        shareStatus.hidden = true;
+        dialog.hidden = false;
+        dialogButton.focus();
+      }
+
+      function showChoiceDialog(title, prompt, options, stage = "wrapUp") {
+        dialogTitle.textContent = title;
+        dialogText.textContent = prompt;
+        dialogButton.hidden = true;
+        choices.replaceChildren();
+        options.forEach((option, index) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = option;
+          button.dataset.choice = String(index);
+          choices.append(button);
+        });
+        choices.hidden = false;
+        dialogStage = stage;
+        shareStatus.hidden = true;
+        dialog.hidden = false;
+        choices.querySelector("button")?.focus();
+      }
+
+      function showActionToast(message) {
+        actionToast.textContent = message;
+        actionToast.classList.add("visible");
+        window.clearTimeout(toastTimer);
+        toastTimer = window.setTimeout(() => actionToast.classList.remove("visible"), 3200);
+      }
+
+      function updateSparkScore() {
+        sparkScoreBadge.textContent = `✨ ${sparkScore}`;
+        sparkScoreBadge.setAttribute("aria-label", `Puntos de aventura: ${sparkScore}`);
+        if (activeMiniGame) {
+          miniGameCombo.textContent = `🔥 Racha: ${sparkCombo} · +${lastSparkAward} ✨`;
+        }
+      }
+
+      function awardSparks(points) {
+        sparkCombo += 1;
+        const streakBonus = sparkCombo % 3 === 0 ? 10 : 0;
+        lastSparkAward = points + streakBonus;
+        sparkScore += lastSparkAward;
+        updateSparkScore();
+        sparkScoreBadge.classList.remove("spark-pop");
+        miniGameCard.classList.remove("spark-pop");
+        void sparkScoreBadge.offsetWidth;
+        sparkScoreBadge.classList.add("spark-pop");
+        if (activeMiniGame) {
+          miniGameCard.classList.add("spark-pop");
+          updateMiniGameHud();
+        }
+        window.clearTimeout(sparkScoreTimer);
+        sparkScoreTimer = window.setTimeout(() => {
+          sparkScoreBadge.classList.remove("spark-pop");
+          miniGameCard.classList.remove("spark-pop");
+        }, 320);
+        return lastSparkAward;
+      }
+
+      function breakSparkCombo() {
+        sparkCombo = 0;
+        lastSparkAward = 0;
+        updateSparkScore();
+      }
+
+      function updateMiniGameHud() {
+        if (!activeMiniGame) return;
+        const game = activeMiniGame;
+        const hintCost = 15;
+        let current = 0;
+        let total = 0;
+        let label = "";
+        let showMeter = true;
+
+        if (game.mode === "agenda") {
+          current = game.cards.filter((card, index) => card === game.solution[index]).length;
+          total = game.solution.length;
+          label = `${current}/${total} pasos`;
+        } else if (game.mode === "recipe") {
+          current = game.solution.filter(id => game.selectedIngredients.has(id)).length;
+          total = game.solution.length;
+          label = `${current}/${total} ingredientes`;
+        } else if (game.mode === "vote") {
+          current = game.votes.reduce((sum, votes) => sum + votes, 0);
+          total = game.voteLimit;
+          label = `${current}/${total} votos`;
+        } else if (game.mode === "mural") {
+          current = game.mural.filter((value, index) => value === game.solution[index]).length;
+          total = game.solution.length;
+          label = `${current}/${total} mosaicos`;
+        } else if (game.mode === "storybook") {
+          current = game.storyChoices.filter(Boolean).length;
+          total = game.slots.length;
+          label = `${current}/${total} ideas`;
+        } else if (game.mode === "storyecho") {
+          current = game.echoProgress;
+          total = game.sequence.length;
+          label = `${current}/${total} imágenes`;
+        } else if (game.mode === "classify") {
+          current = game.progress;
+          total = game.rounds.length;
+          label = `${current}/${total} pistas`;
+        } else if (game.mode === "constellation") {
+          current = game.progress;
+          total = game.solution.length;
+          label = `${current}/${total} estrellas`;
+        } else if (game.mode === "match") {
+          current = game.matches;
+          total = game.pairCount;
+          label = `${current}/${total} parejas`;
+        } else if (game.mode === "fieldnotes") {
+          current = game.selectedClues.size;
+          total = game.clues.filter(clue => clue.needed).length;
+          label = `${current}/${total} pistas`;
+        } else if (game.mode === "habitat") {
+          current = Object.keys(game.placements).length;
+          total = game.items.length;
+          label = `${current}/${total} elementos`;
+        } else if (game.mode === "route") {
+          showMeter = false;
+          label = `${Math.max(0, game.visited.size - 1)} pasos de ruta`;
+        } else if (game.mode === "pipes") {
+          showMeter = false;
+          label = `${game.rotationsMade} giros`;
+        } else {
+          showMeter = false;
+        }
+
+        miniGameProgress.hidden = !showMeter;
+        miniGameHintButton.disabled = game.hintUsed || sparkScore < hintCost;
+        miniGameHintButton.textContent = game.hintUsed
+          ? "Pista sabia usada"
+          : sparkScore < hintCost
+            ? `Necesitas ${hintCost} chispas para una pista`
+            : `Canjear ${hintCost} chispas por una pista`;
+        miniGameProgressLabel.textContent = label;
+        miniGameProgressLabel.setAttribute("aria-label", label);
+        if (showMeter) {
+          const percentage = total ? Math.min(100, Math.round(current / total * 100)) : 0;
+          miniGameProgressFill.style.width = `${percentage}%`;
+          miniGameProgress.setAttribute("aria-valuenow", String(current));
+          miniGameProgress.setAttribute("aria-valuemax", String(total));
+        }
+        updateSparkScore();
+      }
+
+      function getMiniGameHint(game) {
+        const hints = {
+          agenda: "Pista: un acuerdo justo primero toma en cuenta lo que necesita cada persona; las responsabilidades se reparten después.",
+          recipe: "Pista: busca ingredientes comestibles que puedan formar una masa y descarta lo que no se usa como alimento.",
+          vote: "Pista: intenta que ninguna propuesta de la comunidad se quede sin voz.",
+          mural: "Pista: compara una fila del modelo a la vez; fíjate en qué dibujo se repite alrededor del centro.",
+          storybook: "Pista: elige ideas que se conecten como una historia; la imaginación transforma lo que conocemos en posibilidades.",
+          storyecho: "Pista: observa el ritmo y el orden de las imágenes antes de repetirlas.",
+          classify: "Pista: pregúntate si otra persona podría comprobarlo mirando o escuchando, o si es una explicación.",
+          constellation: "Pista: continúa desde la última estrella conectada y busca el siguiente tramo del dibujo.",
+          match: "Pista: recuerda la ubicación de las cartas y piensa cómo una experiencia puede hacer sentir a alguien.",
+          route: "Pista: planifica una ruta con pasos vecinos; las diagonales no cuentan y las rocas bloquean el paso.",
+          pipes: "Pista: cada tramo necesita una entrada y una salida alineadas con el recorrido del agua.",
+          fieldnotes: "Pista: basa tus notas solo en señales visibles desde el sendero, sin acercarte ni completar lo que no sabes.",
+          habitat: "Pista: cada ser vivo necesita recursos y refugio adecuados; observa qué lugares pueden convivir sin estorbarse."
+        };
+        return hints[game.mode] || "Pista: vuelve a leer las instrucciones y busca una solución que respete a las personas y al entorno.";
+      }
+
+      function showBreadAnnouncement(completed, total, label) {
+        const pieceNumber = Math.min(completed, total);
+        const breadMessage = pieceNumber === total
+          ? `¡Pan de muerto final conseguido! ${pieceNumber}/${total} trozos. ¡La última enseñanza se saborea!`
+          : `¡Trozo de pan de muerto ganado! ${pieceNumber}/${total}. Cada misión nos enseña algo nuevo.`;
+        showActionToast(`${breadMessage} ${label}`);
+      }
+
+      function showRewardBurst(icon, label) {
+        const burstIcon = rewardBurst.querySelector(".reward-burst-icon");
+        const burstText = rewardBurst.querySelector(".reward-burst-copy span");
+        burstIcon.textContent = icon;
+        burstText.textContent = label;
+        rewardBurst.hidden = false;
+        rewardBurst.classList.remove("visible");
+        void rewardBurst.offsetWidth;
+        rewardBurst.classList.add("visible");
+        window.clearTimeout(rewardBurstTimer);
+        rewardBurstTimer = window.setTimeout(() => {
+          rewardBurst.classList.remove("visible");
+          window.setTimeout(() => {
+            rewardBurst.hidden = true;
+          }, 260);
+        }, 1800);
+      }
+
+      function showRewardOverlay(icon, title, text) {
+        const badge = rewardOverlay.querySelector(".reward-overlay-badge");
+        const heading = rewardOverlay.querySelector(".reward-overlay-title");
+        const body = rewardOverlay.querySelector(".reward-overlay-text");
+        badge.textContent = icon;
+        heading.textContent = title;
+        body.textContent = text;
+        rewardOverlay.hidden = false;
+        rewardOverlay.classList.remove("visible");
+        void rewardOverlay.offsetWidth;
+        rewardOverlay.classList.add("visible");
+        window.clearTimeout(rewardOverlayTimer);
+        rewardOverlayTimer = window.setTimeout(() => {
+          rewardOverlay.classList.remove("visible");
+          window.setTimeout(() => {
+            rewardOverlay.hidden = true;
+          }, 250);
+        }, 2200);
+      }
+
+      function showFinalSummary() {
+        finalSummaryMessage.textContent = `Alex recoge todas las páginas y disfruta el último trozo de pan de muerto. ¡Terminaste con ${sparkScore} chispas de aventura!`;
+        const confettiColors = ["#ffd166", "#ff8c42", "#f25f5c", "#b8e986", "#8ecae6", "#cdb4db", "#fff3b0"];
+        finalConfetti.replaceChildren();
+        for (let index = 0; index < 72; index++) {
+          const piece = document.createElement("span");
+          piece.className = `final-confetti-piece${index % 3 === 0 ? " circle" : ""}`;
+          piece.style.left = `${Math.random() * 100}%`;
+          piece.style.backgroundColor = confettiColors[index % confettiColors.length];
+          piece.style.setProperty("--duration", `${3.2 + Math.random() * 2.4}s`);
+          piece.style.setProperty("--delay", `${Math.random() * 1.4}s`);
+          piece.style.setProperty("--drift", `${Math.round((Math.random() - 0.5) * 220)}px`);
+          piece.style.setProperty("--spin", `${Math.round(360 + Math.random() * 1080)}deg`);
+          finalConfetti.append(piece);
+        }
+        finalSummary.hidden = false;
+        finalSummary.classList.remove("visible");
+        void finalSummary.offsetWidth;
+        finalSummary.classList.add("visible");
+        const entries = worlds.flatMap((world, worldIndexValue) => world.tasks.map((task, taskIndexValue) => ({
+          task,
+          index: worlds.slice(0, worldIndexValue).reduce((sum, currentWorld) => sum + currentWorld.tasks.length, 0) + taskIndexValue
+        })));
+
+        finalDiaryList.replaceChildren();
+        entries.forEach((entry) => {
+          const item = document.createElement("div");
+          item.className = "final-diary-item done";
+          const icon = document.createElement("span");
+          icon.className = "icon";
+          icon.textContent = "📖";
+          const text = document.createElement("div");
+          const title = document.createElement("strong");
+          title.textContent = `${entry.index + 1}. ${entry.task.title}`;
+          const meta = document.createElement("span");
+          meta.textContent = entry.task.lesson || "Lección aprendida";
+          text.append(title, meta);
+          item.append(icon, text);
+          finalDiaryList.append(item);
+        });
+      }
+
+      function renderMiniGame() {
+        if (!activeMiniGame) return;
+        const game = activeMiniGame;
+        miniGameBoard.replaceChildren();
+        miniGameBoard.hidden = false;
+        updateMiniGameHud();
+        if (game.mode === "agenda") {
+          const list = document.createElement("div");
+          list.className = "agenda-list";
+          game.cards.forEach((card, index) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "game-tile";
+            button.dataset.agendaCard = String(index);
+            button.textContent = `${index + 1}. ${card}`;
+            if (game.selectedCard === index) button.classList.add("selected");
+            list.append(button);
+          });
+          miniGameBoard.append(list);
+          miniGameStatus.textContent = game.selectedCard === null
+            ? "Toca la primera tarjeta que quieras mover."
+            : "Ahora toca la tarjeta con la que quieres intercambiarla.";
+          return;
+        }
+        if (game.mode === "recipe") {
+          const list = document.createElement("div");
+          list.className = "ingredient-list";
+          game.ingredients.forEach(ingredient => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "game-tile";
+            button.dataset.ingredient = ingredient.id;
+            button.textContent = ingredient.label;
+            if (game.selectedIngredients.has(ingredient.id)) button.classList.add("selected");
+            list.append(button);
+          });
+          const bake = document.createElement("button");
+          bake.type = "button";
+          bake.className = "game-submit";
+          bake.dataset.bake = "true";
+          bake.textContent = `Preparar receta (${game.selectedIngredients.size}/${game.solution.length})`;
+          miniGameBoard.append(list, bake);
+          miniGameStatus.textContent = game.recipeMessage || "Elige los ingredientes y prepara el pan.";
+          return;
+        }
+        if (game.mode === "vote") {
+          const list = document.createElement("div");
+          list.className = "vote-list";
+          game.proposals.forEach((proposal, index) => {
+            const row = document.createElement("div");
+            row.className = "vote-row";
+            const label = document.createElement("span");
+            label.textContent = proposal;
+            const remove = document.createElement("button");
+            remove.type = "button";
+            remove.dataset.vote = `${index}:remove`;
+            remove.textContent = "−";
+            remove.setAttribute("aria-label", `Quitar un voto a ${proposal}`);
+            remove.disabled = game.votes[index] === 0;
+            const count = document.createElement("strong");
+            count.textContent = String(game.votes[index]);
+            const add = document.createElement("button");
+            add.type = "button";
+            add.dataset.vote = `${index}:add`;
+            add.textContent = "+";
+            add.setAttribute("aria-label", `Dar un voto a ${proposal}`);
+            add.disabled = game.votes.reduce((sum, votes) => sum + votes, 0) >= game.voteLimit;
+            row.append(label, remove, count, add);
+            list.append(row);
+          });
+          const submit = document.createElement("button");
+          submit.type = "button";
+          submit.className = "game-submit";
+          submit.dataset.finishVote = "true";
+          submit.textContent = `Cerrar votación (${game.votes.reduce((sum, votes) => sum + votes, 0)}/${game.voteLimit})`;
+          const totalVotes = game.votes.reduce((sum, votes) => sum + votes, 0);
+          submit.disabled = totalVotes !== game.voteLimit || game.votes.some(votes => votes < 1);
+          miniGameBoard.append(list, submit);
+          miniGameStatus.textContent = game.voteMessage || "Escuchar a todos significa que cada propuesta recibe al menos una voz.";
+          return;
+        }
+        if (game.mode === "mural") {
+          const wrapper = document.createElement("div");
+          wrapper.className = "mural-wrap";
+          const legend = document.createElement("p");
+          legend.textContent = game.palette.map((icon, index) => `${index}: ${icon}`).join(" · ");
+          const reference = document.createElement("div");
+          reference.className = "mural-grid";
+          game.solution.forEach(value => {
+            const cell = document.createElement("span");
+            cell.className = "mural-cell";
+            cell.textContent = game.palette[value];
+            cell.setAttribute("aria-label", `Diseño modelo: ${game.palette[value]}`);
+            reference.append(cell);
+          });
+          const canvas = document.createElement("div");
+          canvas.className = "mural-grid";
+          game.mural.forEach((value, index) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "mural-cell";
+            button.dataset.muralCell = String(index);
+            button.textContent = game.palette[value];
+            button.setAttribute("aria-label", `Pintar mosaico ${index + 1}`);
+            canvas.append(button);
+          });
+          wrapper.append(legend, reference, canvas);
+          miniGameBoard.append(wrapper);
+          miniGameStatus.textContent = game.muralMessage || "Copia el diseño: toca las casillas para cambiar sus dibujos.";
+          return;
+        }
+        if (game.mode === "storybook") {
+          if (game.storyComplete) {
+            const story = document.createElement("p");
+            story.className = "mini-game-question";
+            story.textContent = game.storyMessage;
+            const continueButton = document.createElement("button");
+            continueButton.type = "button";
+            continueButton.className = "game-submit";
+            continueButton.dataset.finishStoryContinue = "true";
+            continueButton.textContent = "Compartir la historia";
+            miniGameBoard.append(story, continueButton);
+            miniGameStatus.textContent = "¡Tu historia ya forma parte del mundo que imaginaste!";
+            return;
+          }
+          const form = document.createElement("div");
+          form.className = "story-slots";
+          game.slots.forEach((slot, index) => {
+            const row = document.createElement("div");
+            row.className = "story-slot";
+            const label = document.createElement("label");
+            label.textContent = slot.label;
+            label.htmlFor = `story-slot-${index}`;
+            const select = document.createElement("select");
+            select.id = `story-slot-${index}`;
+            select.dataset.storySlot = String(index);
+            const placeholder = document.createElement("option");
+            placeholder.value = "";
+            placeholder.textContent = "Elige una idea…";
+            select.append(placeholder);
+            slot.options.forEach(option => {
+              const entry = document.createElement("option");
+              entry.value = option;
+              entry.textContent = option;
+              select.append(entry);
+            });
+            select.value = game.storyChoices[index];
+            row.append(label, select);
+            form.append(row);
+          });
+          const submit = document.createElement("button");
+          submit.type = "button";
+          submit.className = "game-submit";
+          submit.dataset.finishStory = "true";
+          submit.textContent = "Leer mi historia";
+          submit.disabled = game.storyChoices.some(choice => !choice);
+          form.append(submit);
+          miniGameBoard.append(form);
+          miniGameStatus.textContent = game.storyMessage || "Elige ideas para combinar en tu historia.";
+          return;
+        }
+        if (game.mode === "storyecho") {
+          const board = document.createElement("div");
+          board.className = "echo-board";
+          const play = document.createElement("button");
+          play.type = "button";
+          play.dataset.playStoryEcho = "true";
+          play.textContent = game.echoPlaying ? "Observa la secuencia…" : "Ver secuencia";
+          play.disabled = game.echoPlaying;
+          board.append(play);
+          const symbols = document.createElement("div");
+          symbols.className = "echo-symbols";
+          game.symbols.forEach((symbol, index) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "echo-symbol";
+            button.dataset.echoSymbol = String(index);
+            button.textContent = symbol.icon;
+            button.setAttribute("aria-label", symbol.label);
+            button.disabled = !game.echoReady || game.echoPlaying;
+            if (game.echoCurrent === index) button.classList.add("active");
+            symbols.append(button);
+          });
+          board.append(symbols);
+          miniGameBoard.append(board);
+          miniGameStatus.textContent = game.echoMessage ||
+            (game.echoReady ? `Repite la secuencia: ${game.echoProgress} de ${game.sequence.length}` : "Pulsa «Ver secuencia» y observa con atención.");
+          return;
+        }
+        if (game.mode === "classify") {
+          const round = game.rounds[game.progress];
+          const question = document.createElement("p");
+          question.className = "mini-game-question";
+          question.textContent = `${round.item} · ${round.question}`;
+          miniGameBoard.append(question);
+          const options = document.createElement("div");
+          options.className = "mini-game-options";
+          round.options.forEach((label, index) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.dataset.gameChoice = String(index);
+            button.textContent = label;
+            options.append(button);
+          });
+          miniGameBoard.append(options);
+          miniGameStatus.textContent = game.classifyMessage || `Pista ${game.progress + 1} de ${game.rounds.length}`;
+          return;
+        }
+        if (game.mode === "constellation") {
+          const board = document.createElement("div");
+          board.className = "constellation-board";
+          const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          svg.setAttribute("class", "constellation-lines");
+          svg.setAttribute("viewBox", "0 0 100 100");
+          const line = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+          line.setAttribute("points", game.path.map(index => {
+            const node = game.nodes[index];
+            return `${node.x},${node.y}`;
+          }).join(" "));
+          svg.append(line);
+          board.append(svg);
+          game.nodes.forEach((node, index) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "constellation-node";
+            button.dataset.star = String(index);
+            button.style.left = `${node.x}%`;
+            button.style.top = `${node.y}%`;
+            button.textContent = game.path.includes(index) ? "✦" : "☆";
+            button.setAttribute("aria-label", `Estrella ${index + 1}`);
+            if (game.path.includes(index)) button.classList.add("done");
+            board.append(button);
+          });
+          miniGameBoard.append(board);
+          miniGameStatus.textContent = `Estrella ${game.progress + 1} de ${game.solution.length}`;
+          return;
+        }
+        if (game.mode === "match") {
+          const grid = document.createElement("div");
+          grid.className = "match-grid";
+          game.cards.forEach((card, index) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "match-card";
+            button.dataset.matchCard = String(index);
+            const visible = card.revealed || card.matched;
+            button.textContent = visible ? `${card.icon} ${card.text}` : "❔";
+            button.setAttribute("aria-label", visible ? card.text : `Carta tapada ${index + 1}`);
+            if (card.revealed) button.classList.add("revealed");
+            if (card.matched) button.classList.add("matched");
+            grid.append(button);
+          });
+          miniGameBoard.append(grid);
+          miniGameStatus.textContent = `Parejas encontradas: ${game.matches} de ${game.pairCount}`;
+          return;
+        }
+        if (game.mode === "route") {
+          const grid = document.createElement("div");
+          grid.className = "route-grid";
+          for (let index = 0; index < game.rows * game.columns; index++) {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "route-cell";
+            button.dataset.routeCell = String(index);
+            if (game.blocked.has(index)) {
+              button.textContent = "🪨";
+              button.classList.add("blocked");
+              button.setAttribute("aria-label", `Roca ${index + 1}`);
+              button.disabled = true;
+            } else if (index === game.position) {
+              button.textContent = "⛵";
+              button.classList.add("player");
+              button.setAttribute("aria-label", "Barco");
+            } else if (index === game.goal) {
+              button.textContent = "⚓";
+              button.setAttribute("aria-label", "Puerto seguro");
+            } else {
+              button.textContent = game.visited.has(index) ? "·" : "🌊";
+              if (game.visited.has(index)) button.classList.add("visited");
+              button.setAttribute("aria-label", `Agua, casilla ${index + 1}`);
+            }
+            grid.append(button);
+          }
+          miniGameBoard.append(grid);
+          miniGameStatus.textContent = "Toca una casilla vecina o usa las flechas. ¡Cuidado con las rocas!";
+          return;
+        }
+        if (game.mode === "pipes") {
+          const grid = document.createElement("div");
+          grid.className = "pipe-grid";
+          game.tiles.forEach((tile, index) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = `pipe-cell${tile.type === "empty" ? " empty" : ""}`;
+            button.dataset.pipeTile = String(index);
+            if (tile.type === "source") {
+              button.textContent = "💧";
+              button.classList.add("source");
+              button.setAttribute("aria-label", "Manantial");
+              button.disabled = true;
+            } else if (tile.type === "target") {
+              button.textContent = "🌱";
+              button.classList.add("target");
+              button.setAttribute("aria-label", "Arroyo");
+              button.disabled = true;
+            } else if (tile.type === "empty") {
+              button.textContent = "";
+              button.disabled = true;
+              button.setAttribute("aria-hidden", "true");
+            } else {
+              button.textContent = pipeGlyph(pipeConnections(tile));
+              button.setAttribute("aria-label", `Girar canal ${index + 1}`);
+            }
+            grid.append(button);
+          });
+          miniGameBoard.append(grid);
+          miniGameStatus.textContent = game.pipeMessage || "Gira las piezas hasta conectar el manantial con el arroyo.";
+          return;
+        }
+        if (game.mode === "fieldnotes") {
+          const list = document.createElement("div");
+          list.className = "evidence-grid";
+          game.clues.forEach((clue, index) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "game-tile";
+            button.dataset.clue = String(index);
+            button.textContent = clue.label;
+            if (game.selectedClues.has(index)) button.classList.add("correct");
+            list.append(button);
+          });
+          miniGameBoard.append(list);
+          miniGameStatus.textContent = game.fieldMessage || `Pistas observadas: ${game.selectedClues.size} de ${game.clues.filter(clue => clue.needed).length}`;
+          return;
+        }
+        if (game.mode === "habitat") {
+          const items = document.createElement("div");
+          items.className = "habitat-items";
+          game.items.forEach((item, index) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "habitat-item";
+            button.dataset.habitatItem = String(index);
+            button.textContent = item.label;
+            if (game.selectedItem === index) button.classList.add("selected");
+            if (game.placements[item.slot] === item.id) {
+              button.classList.add("correct");
+              button.disabled = true;
+            }
+            items.append(button);
+          });
+          const grid = document.createElement("div");
+          grid.className = "habitat-grid";
+          game.cells.forEach((cell, index) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "habitat-cell";
+            button.dataset.habitatCell = String(index);
+            const placed = game.items.find(item => game.placements[index] === item.id);
+            button.textContent = placed ? placed.icon : cell;
+            button.setAttribute("aria-label", placed ? `${cell}: ${placed.label}` : cell);
+            if (placed) button.classList.add("correct");
+            grid.append(button);
+          });
+          miniGameBoard.append(items, grid);
+          miniGameStatus.textContent = game.habitatMessage || "Elige un elemento y toca el lugar donde debe ir.";
+          return;
+        }
+      }
+
+      function startMiniGame(target, targetIndex) {
+        const mode = target.miniGame.mode;
+        lastSparkAward = 0;
+        activeMiniGame = {
+          targetIndex,
+          mode,
+          hintUsed: false,
+          progress: 0,
+          rounds: target.miniGame.rounds || [],
+          pairs: target.miniGame.pairs || [],
+          pairCount: new Set((target.miniGame.pairs || []).map(pair => pair.id)).size,
+          cards: target.miniGame.cards ? [...target.miniGame.cards] : [],
+          openCards: [],
+          matches: 0,
+          locked: false,
+          selectedCard: null,
+          solution: target.miniGame.solution || [],
+          ingredients: target.miniGame.ingredients || [],
+          selectedIngredients: new Set(),
+          recipeMessage: "",
+          proposals: target.miniGame.proposals || [],
+          votes: (target.miniGame.proposals || []).map(() => 0),
+          voteLimit: target.miniGame.votes || 0,
+          voteMessage: "",
+          palette: target.miniGame.palette || [],
+          mural: (target.miniGame.solution || []).map(() => 0),
+          scoredMuralCells: new Set(),
+          muralMessage: "",
+          slots: target.miniGame.slots || [],
+          storyChoices: (target.miniGame.slots || []).map(() => ""),
+          storyMessage: "",
+          storyComplete: false,
+          symbols: target.miniGame.symbols || [],
+          sequence: target.miniGame.sequence || [],
+          echoProgress: 0,
+          echoReady: false,
+          echoPlaying: false,
+          echoCurrent: -1,
+          echoMessage: "",
+          classifyMessage: "",
+          nodes: target.miniGame.nodes || [],
+          path: [],
+          rows: target.miniGame.rows || 0,
+          columns: target.miniGame.columns || 0,
+          position: target.miniGame.start || 0,
+          goal: target.miniGame.goal || 0,
+          blocked: new Set(target.miniGame.blocked || []),
+          visited: new Set([target.miniGame.start || 0]),
+          tiles: (target.miniGame.tiles || []).map((type, index) => ({ type, rotation: target.miniGame.rotations?.[index] || 0 })),
+          rotationsMade: 0,
+          pipeMessage: "",
+          clues: target.miniGame.clues || [],
+          selectedClues: new Set(),
+          fieldMessage: "",
+          cells: target.miniGame.cells || [],
+          items: target.miniGame.items || [],
+          selectedItem: null,
+          placements: {},
+          habitatMessage: ""
+        };
+        if (mode === "match") {
+          activeMiniGame.cards = activeMiniGame.pairs.map(pair => ({ ...pair, revealed: false, matched: false }));
+          for (let index = activeMiniGame.cards.length - 1; index > 0; index--) {
+            const swapIndex = Math.floor(Math.random() * (index + 1));
+            [activeMiniGame.cards[index], activeMiniGame.cards[swapIndex]] =
+              [activeMiniGame.cards[swapIndex], activeMiniGame.cards[index]];
+          }
+        }
+        keys.clear();
+        miniGameTitle.textContent = target.miniGame.title;
+        miniGamePrompt.textContent = target.miniGame.prompt;
+        updateSparkScore();
+        touchActionButton.textContent = "Elige en pantalla";
+        touchActionButton.setAttribute("aria-label", "Elige una acción en el minijuego");
+        miniGamePanel.hidden = false;
+        renderMiniGame();
+        miniGameCancel.focus();
+      }
+
+      async function playStoryEcho(game) {
+        if (game.echoPlaying) return;
+        game.echoPlaying = true;
+        game.echoReady = false;
+        game.echoProgress = 0;
+        game.echoMessage = "";
+        for (const symbolIndex of game.sequence) {
+          if (activeMiniGame !== game) return;
+          game.echoCurrent = symbolIndex;
+          renderMiniGame();
+          await new Promise(resolve => window.setTimeout(resolve, 480));
+          if (activeMiniGame !== game) return;
+          game.echoCurrent = -1;
+          renderMiniGame();
+          await new Promise(resolve => window.setTimeout(resolve, 180));
+        }
+        if (activeMiniGame !== game) return;
+        game.echoPlaying = false;
+        game.echoReady = true;
+        game.echoMessage = "¡Tu turno! Toca las imágenes en el mismo orden.";
+        renderMiniGame();
+      }
+
+      function pipeConnections(tile) {
+        const base = tile.type === "corner" ? [0, 1] : [0, 2];
+        return base.map(direction => (direction + tile.rotation) % 4);
+      }
+
+      function pipeGlyph(connections) {
+        const shapes = new Map([
+          ["0,1", "└"], ["1,2", "┌"], ["2,3", "┐"], ["0,3", "┘"],
+          ["0,2", "│"], ["1,3", "─"]
+        ]);
+        return shapes.get([...connections].sort().join(",")) || "┼";
+      }
+
+      function hasWaterPath(game) {
+        const offsets = [-game.columns, 1, game.columns, -1];
+        const opposite = [2, 3, 0, 1];
+        const source = game.tiles.findIndex(tile => tile.type === "source");
+        const target = game.tiles.findIndex(tile => tile.type === "target");
+        const queue = [source];
+        const visited = new Set(queue);
+        while (queue.length) {
+          const index = queue.shift();
+          const exits = game.tiles[index].type === "source" ? [1] : pipeConnections(game.tiles[index]);
+          for (const direction of exits) {
+            const next = index + offsets[direction];
+            if (next < 0 || next >= game.tiles.length) continue;
+            const row = Math.floor(index / game.columns);
+            const nextRow = Math.floor(next / game.columns);
+            const nextColumn = next % game.columns;
+            if (Math.abs(row - nextRow) + Math.abs(index % game.columns - nextColumn) !== 1) continue;
+            const incoming = game.tiles[next].type === "target"
+              ? [3]
+              : ["corner", "straight"].includes(game.tiles[next].type)
+                ? pipeConnections(game.tiles[next])
+                : [];
+            if (!incoming.includes(opposite[direction])) continue;
+            if (next === target) return true;
+            if (!visited.has(next)) {
+              visited.add(next);
+              queue.push(next);
+            }
+          }
+        }
+        return false;
+      }
+
+      function moveRoute(direction) {
+        const game = activeMiniGame;
+        const offsets = { ArrowUp: -game.columns, ArrowRight: 1, ArrowDown: game.columns, ArrowLeft: -1 };
+        const offset = offsets[direction];
+        if (offset === undefined) return;
+        const next = game.position + offset;
+        const rowChange = Math.abs(Math.floor(next / game.columns) - Math.floor(game.position / game.columns));
+        const columnChange = Math.abs(next % game.columns - game.position % game.columns);
+        if (next < 0 || next >= game.rows * game.columns || rowChange + columnChange !== 1 || game.blocked.has(next)) {
+          breakSparkCombo();
+          miniGameStatus.textContent = "¡Hay una roca o saldrías de la ruta! Prueba otra casilla.";
+          return;
+        }
+        game.position = next;
+        const firstVisit = !game.visited.has(next);
+        game.visited.add(next);
+        if (firstVisit) awardSparks(5);
+        else breakSparkCombo();
+        if (next === game.goal) {
+          finishMiniGame();
+          return;
+        }
+        renderMiniGame();
+      }
+
+      function finishMiniGame() {
+        const targetIndex = activeMiniGame.targetIndex;
+        awardSparks(25);
+        activeMiniGame = null;
+        miniGamePanel.hidden = true;
+        miniGameBoard.hidden = true;
+        touchActionButton.textContent = "Hablar / acción";
+        touchActionButton.setAttribute("aria-label", "Hablar o realizar acción");
+        keys.clear();
+        completeActionTarget(currentTask(), targetIndex);
+      }
+
+      function advanceMiniGame(key) {
+        if (!activeMiniGame) return;
+        if (activeMiniGame.mode === "route") moveRoute(key);
+        else if (key === "interact") miniGameStatus.textContent = "Toca una pieza o elemento del minijuego para continuar.";
+      }
+
+      function cancelMiniGame() {
+        if (!activeMiniGame) return;
+        activeMiniGame = null;
+        miniGamePanel.hidden = true;
+        miniGameBoard.hidden = true;
+        touchActionButton.textContent = "Hablar / acción";
+        touchActionButton.setAttribute("aria-label", "Hablar o realizar acción");
+        keys.clear();
+        showActionToast("Reto pausado. Vuelve a acercarte a la señal para intentarlo.");
+      }
+
+      miniGameHintButton.addEventListener("click", () => {
+        if (!activeMiniGame || activeMiniGame.hintUsed || sparkScore < 15) return;
+        sparkScore -= 15;
+        lastSparkAward = 0;
+        activeMiniGame.hintUsed = true;
+        miniGameStatus.textContent = getMiniGameHint(activeMiniGame);
+        showActionToast("Canjeaste 15 chispas por una pista educativa. ¡Úsala para pensar tu siguiente jugada!");
+        updateSparkScore();
+        updateMiniGameHud();
+      });
+
+      function startCinematic(completedCount) {
+        cinematic = cinematicScenes[completedCount];
+        cinematicTitle.textContent = cinematic.title;
+        cinematicText.textContent = cinematic.text;
+        cinematicButton.textContent = cinematic.button;
+        cinematicPanel.hidden = false;
+        dialog.hidden = true;
+        updateHud();
+        cinematicButton.focus();
+      }
+
+      function finishCinematic() {
+        const scene = cinematic;
+        cinematic = null;
+        keys.clear();
+        cinematicPanel.hidden = true;
+        actionProgress = 0;
+        actionCompleted = new Set();
+        if (scene.toWorld < 0) {
+          finished = true;
+          updateHud();
+          showDialog("El viaje de Alex", "Alex ya no ve la experiencia humana como una sola respuesta: la construimos al convivir, transmitir y transformar culturas, escuchar distintas experiencias e imaginar posibilidades. Aprendió a contrastar las ideas con evidencias y a recordar que los seres humanos somos parte de un mundo compartido con otros seres, cuyas vidas no son copias de las nuestras. El diario queda abierto para nuevas preguntas. ¡Gracias por acompañarlo!", "ending", "Jugar de nuevo");
+          return;
+        }
+        worldIndex = scene.toWorld;
+        taskIndex = 0;
+        player.x = 120;
+        player.y = 380;
+        updateHud();
+      }
+
+      function completeActionTarget(task, targetIndex) {
+        const expected = currentActionTarget(task);
+        if (task.action.orderMatters && targetIndex !== expected) {
+          breakSparkCombo();
+          showActionToast(`Sigue el recorrido: primero ${task.action.targets[expected].label}. ¡La misión gana cuando observas con calma!`);
+          return;
+        }
+        if (actionCompleted.has(targetIndex)) return;
+        actionCompleted.add(targetIndex);
+        actionProgress += 1;
+        const earnedSparks = awardSparks(20);
+        updateHud();
+        const target = task.action.targets[targetIndex];
+        const remaining = task.action.targets.length - actionProgress;
+        const nextInstruction = remaining
+          ? task.action.orderMatters
+            ? `Ahora continúa con: ${task.action.targets[currentActionTarget(task)].label}. ¡Cada paso enseña algo!`
+            : `Todavía puedes completar ${remaining} punto${remaining === 1 ? "" : "s"} de observación.`
+          : `¡Acción terminada! Vuelve con ${task.character}. ¡La lección ya está en marcha!`;
+        showActionToast(`${target.feedback || "¡Buen trabajo!"} ${nextInstruction} ✨ +${earnedSparks} chispas`);
+      }
+
+      function startActionChallenge(target, targetIndex) {
+        pendingActionTarget = targetIndex;
+        showChoiceDialog(target.challenge.title, target.challenge.prompt, target.challenge.options, "actionChallenge");
+      }
+
+      choices.addEventListener("click", event => {
+        const button = event.target.closest("button[data-choice]");
+        if (!button) return;
+        const task = currentTask();
+        if (dialogStage === "npcReflection") {
+          const target = task.action.targets[pendingActionTarget];
+          const reflection = target.npc.reflection;
+          if (Number(button.dataset.choice) !== reflection.answer) {
+            breakSparkCombo();
+            dialogText.textContent = `${reflection.insight} ¿Qué respuesta tomaría en cuenta esta idea? ¡Es una buena pista para aprender a escuchar mejor!`;
+            choices.querySelector("button")?.focus();
+            return;
+          }
+          awardSparks(15);
+          showDialog(target.npc.name, reflection.insight + " ¡Así se aprende a escuchar y cuidar a la comunidad!", "actionNpcReflectionSuccess", "Continuar con la actividad");
+          return;
+        }
+        if (dialogStage === "actionChallenge") {
+          const target = task.action.targets[pendingActionTarget];
+          if (Number(button.dataset.choice) !== target.challenge.answer) {
+            breakSparkCombo();
+            dialogText.textContent = `Esa opción podría causar un problema. Piensa en cómo cuidar a los demás y el entorno, y prueba otra vez. ${target.challenge.prompt} ¡La enseñanza va en cada decisión!`;
+            choices.querySelector("button")?.focus();
+            return;
+          }
+          awardSparks(15);
+          showDialog(target.challenge.title, target.challenge.feedback + " ¡Qué buena elección! Aquí aprendemos a decidir con empatía y conciencia.", "actionChallengeSuccess", "Continuar actividad");
+          return;
+        }
+        if (dialogStage !== "wrapUp") return;
+        if (Number(button.dataset.choice) !== task.wrapUp.answer) {
+          breakSparkCombo();
+          showDialog(task.character, "¡A seguir observando! Cada pista cuenta y cada respuesta ayuda a aprender mejor.", "wrapUpRetry", "Intentar de nuevo");
+          return;
+        }
+        awardSparks(20);
+        showDialog(task.character, `${task.wrapUp.feedback} ${task.story} ¡La misión termina con una enseñanza muy útil!`, "story", "Leer página del diario");
+      });
+
+      function interact() {
+        if (!dialog.hidden || finished) return;
+        const task = currentTask();
+        const taskId = completedTaskCount();
+        if (Math.hypot(player.x - task.x, player.y - task.y) > 105) {
+          if (!startedTasks.has(taskId)) {
+            showDialog("Sigue la pista", "Acércate al personaje para recibir su encargo.", "hint", "Entendido");
+            return;
+          }
+        }
+        if (!startedTasks.has(taskId)) {
+          startedTasks.add(taskId);
+          actionProgress = 0;
+          actionCompleted = new Set();
+          updateHud();
+          showDialog(task.character, `${task.assignment} Explora el escenario, interactúa con sus objetos y completa esta actividad: ${task.action.name}. Algunas señales incluyen un pequeño reto. ¡Vamos a jugar, aprender y compartir!`, "assignment", "¡Aceptar misión!");
+          return;
+        }
+        const nearbyAction = task.action.targets.findIndex((target, index) =>
+          !actionCompleted.has(index) && !isAutoTarget(task, target) &&
+          Math.hypot(player.x - target.x, player.y - target.y) < 62
+        );
+        if (nearbyAction >= 0) {
+          const target = task.action.targets[nearbyAction];
+          if (task.action.orderMatters && nearbyAction !== currentActionTarget(task)) {
+            showActionToast(`Sigue el recorrido: primero ${task.action.targets[currentActionTarget(task)].label}.`);
+          } else if (target.miniGame) {
+            startMiniGame(target, nearbyAction);
+          } else if (target.challenge) {
+            startActionChallenge(target, nearbyAction);
+          } else if (target.npc) {
+            pendingActionTarget = nearbyAction;
+            if (target.npc.reflection) {
+              showChoiceDialog(target.npc.name, `${target.npc.line}\n\n${target.npc.reflection.question}`, target.npc.reflection.options, "npcReflection");
+            } else {
+              showDialog(target.npc.name, target.npc.line, "actionNpc", "Continuar");
+            }
+          } else {
+            completeActionTarget(task, nearbyAction);
+          }
+          return;
+        }
+        if (actionProgress < task.action.targets.length) {
+          if (Math.hypot(player.x - task.x, player.y - task.y) <= 105) {
+            const target = task.action.targets[currentActionTarget(task)];
+            showDialog("Encargo en curso", isAutoTarget(task, target)
+                ? `Navega con las flechas o WASD y atraviesa el punto «${target.label}». ¡Aquí empieza la parte divertida!`
+                : `Explora el escenario y busca el punto «${target.label}». Acércate y pulsa E para realizar la acción. ¡Cada pista enseña algo nuevo!`,
+            "hint", "Seguir buscando");
+          }
+          return;
+        }
+        if (Math.hypot(player.x - task.x, player.y - task.y) > 105) return;
+        if (task.wrapUp) {
+          showChoiceDialog(task.character, `${task.wrapUp.prompt} ¡Aquí aplicamos la enseñanza de la misión!`, task.wrapUp.options);
+          return;
+        }
+        showDialog(task.character, `${task.story} ¡Qué buen trabajo! Cada decisión ayuda a comprender mejor la experiencia humana.`, "story", "Leer página del diario");
+      }
+
+      eatPanButton.addEventListener("click", () => {
+        dialog.hidden = true;
+        showFinalSummary();
+      });
+
+      rewardOverlayButton.addEventListener("click", () => {
+        rewardOverlay.classList.remove("visible");
+        window.setTimeout(() => {
+          rewardOverlay.hidden = true;
+        }, 250);
+      });
+
+      finalSummaryButton.addEventListener("click", () => {
+        finalSummary.classList.remove("visible");
+        finalConfetti.replaceChildren();
+        window.setTimeout(() => {
+          finalSummary.hidden = true;
+        }, 250);
+      });
+
+      dialogButton.addEventListener("click", () => {
+        if (dialogStage === "assignment") {
+          dialog.hidden = true;
+        } else if (dialogStage === "panEaten") {
+          dialog.hidden = true;
+        } else if (dialogStage === "actionNpc") {
+          const targetIndex = pendingActionTarget;
+          pendingActionTarget = -1;
+          dialog.hidden = true;
+          completeActionTarget(currentTask(), targetIndex);
+        } else if (dialogStage === "actionNpcReflectionSuccess") {
+          const targetIndex = pendingActionTarget;
+          pendingActionTarget = -1;
+          dialog.hidden = true;
+          completeActionTarget(currentTask(), targetIndex);
+        } else if (dialogStage === "actionChallengeSuccess") {
+          const targetIndex = pendingActionTarget;
+          pendingActionTarget = -1;
+          dialog.hidden = true;
+          completeActionTarget(currentTask(), targetIndex);
+        } else if (dialogStage === "wrapUpRetry") {
+          const task = currentTask();
+          showChoiceDialog(task.character, task.wrapUp.prompt, task.wrapUp.options);
+        } else if (dialogStage === "story") {
+          showDialog("Página del diario", currentTask().lesson, "lesson",
+            completedTaskCount() === totalTasks - 1 ? "Unir las páginas" : "Continuar la aventura");
+        } else if (dialogStage === "lesson") {
+          const completed = completedTaskCount();
+          if (cinematicScenes[completed]) {
+            startCinematic(completed);
+          } else {
+            taskIndex += 1;
+            actionProgress = 0;
+            actionCompleted = new Set();
+            updateHud();
+            dialog.hidden = true;
+          }
+        } else if (dialogStage === "ending") {
+          finished = false;
+          worldIndex = 0;
+          taskIndex = 0;
+          actionProgress = 0;
+          actionCompleted = new Set();
+          startedTasks.clear();
+          player.x = 120;
+          player.y = 380;
+          updateHud();
+          dialog.hidden = true;
+          finalSummary.classList.remove("visible");
+          finalSummary.hidden = true;
+          gameStarted = false;
+          gameShell.hidden = true;
+          titleScreen.hidden = false;
+          playButton.focus();
+        } else {
+          dialog.hidden = true;
+        }
+      });
+
+      cinematicButton.addEventListener("click", finishCinematic);
+      miniGameCancel.addEventListener("click", cancelMiniGame);
+      miniGameBoard.addEventListener("change", event => {
+        const select = event.target.closest("select[data-story-slot]");
+        if (!select || !activeMiniGame || activeMiniGame.mode !== "storybook") return;
+        activeMiniGame.storyChoices[Number(select.dataset.storySlot)] = select.value;
+        activeMiniGame.storyMessage = "";
+        renderMiniGame();
+      });
+      miniGameBoard.addEventListener("click", event => {
+        if (!activeMiniGame || activeMiniGame.locked) return;
+        if (event.target.closest("button[data-play-story-echo]") && activeMiniGame.mode === "storyecho") {
+          playStoryEcho(activeMiniGame);
+          return;
+        }
+        const echoSymbol = event.target.closest("button[data-echo-symbol]");
+        if (echoSymbol && activeMiniGame.mode === "storyecho" && activeMiniGame.echoReady) {
+          const chosen = Number(echoSymbol.dataset.echoSymbol);
+          const game = activeMiniGame;
+          if (chosen !== game.sequence[game.echoProgress]) {
+            breakSparkCombo();
+            game.echoProgress = 0;
+            game.echoMessage = "¡Casi! Mira de nuevo la secuencia y vuelve a intentarlo.";
+            renderMiniGame();
+            return;
+          }
+          awardSparks(10);
+          game.echoProgress += 1;
+          if (game.echoProgress === game.sequence.length) {
+            finishMiniGame();
+          } else {
+            game.echoMessage = `¡Bien! Sigue con la imagen ${game.echoProgress + 1}.`;
+            renderMiniGame();
+          }
+          return;
+        }
+        const agendaButton = event.target.closest("button[data-agenda-card]");
+        if (agendaButton && activeMiniGame.mode === "agenda") {
+          const index = Number(agendaButton.dataset.agendaCard);
+          if (activeMiniGame.selectedCard === null) {
+            activeMiniGame.selectedCard = index;
+          } else {
+            const first = activeMiniGame.selectedCard;
+            const correctBefore = activeMiniGame.cards.filter((card, cardIndex) => card === activeMiniGame.solution[cardIndex]).length;
+            [activeMiniGame.cards[first], activeMiniGame.cards[index]] =
+              [activeMiniGame.cards[index], activeMiniGame.cards[first]];
+            activeMiniGame.selectedCard = null;
+            const correctAfter = activeMiniGame.cards.filter((card, cardIndex) => card === activeMiniGame.solution[cardIndex]).length;
+            if (correctAfter > correctBefore) awardSparks(10);
+            if (activeMiniGame.cards.every((card, cardIndex) => card === activeMiniGame.solution[cardIndex])) {
+              finishMiniGame();
+              return;
+            }
+          }
+          renderMiniGame();
+          return;
+        }
+        const ingredientButton = event.target.closest("button[data-ingredient]");
+        if (ingredientButton && activeMiniGame.mode === "recipe") {
+          const id = ingredientButton.dataset.ingredient;
+          if (activeMiniGame.selectedIngredients.has(id)) activeMiniGame.selectedIngredients.delete(id);
+          else activeMiniGame.selectedIngredients.add(id);
+          activeMiniGame.recipeMessage = "";
+          renderMiniGame();
+          return;
+        }
+        if (event.target.closest("button[data-bake]") && activeMiniGame.mode === "recipe") {
+          const selected = activeMiniGame.selectedIngredients;
+          const correct = selected.size === activeMiniGame.solution.length &&
+            activeMiniGame.solution.every(id => selected.has(id));
+          if (correct) {
+            awardSparks(20);
+            finishMiniGame();
+          } else {
+            breakSparkCombo();
+            activeMiniGame.recipeMessage = selected.size !== activeMiniGame.solution.length
+              ? `La receta lleva ${activeMiniGame.solution.length} ingredientes. Ajusta la selección.`
+              : "¡Esa mezcla necesita otros ingredientes! Revisa la receta.";
+            renderMiniGame();
+          }
+          return;
+        }
+        const voteButton = event.target.closest("button[data-vote]");
+        if (voteButton && activeMiniGame.mode === "vote") {
+          const [indexText, operation] = voteButton.dataset.vote.split(":");
+          const index = Number(indexText);
+          const total = activeMiniGame.votes.reduce((sum, votes) => sum + votes, 0);
+          if (operation === "add" && total < activeMiniGame.voteLimit) activeMiniGame.votes[index] += 1;
+          if (operation === "remove" && activeMiniGame.votes[index] > 0) activeMiniGame.votes[index] -= 1;
+          activeMiniGame.voteMessage = "";
+          renderMiniGame();
+          return;
+        }
+        if (event.target.closest("button[data-finish-vote]") && activeMiniGame.mode === "vote") {
+          const total = activeMiniGame.votes.reduce((sum, votes) => sum + votes, 0);
+          if (total === activeMiniGame.voteLimit && activeMiniGame.votes.every(votes => votes > 0)) {
+            awardSparks(20);
+            finishMiniGame();
+          } else {
+            breakSparkCombo();
+            activeMiniGame.voteMessage = "Usa todos los votos y asegúrate de que cada propuesta reciba al menos uno.";
+            renderMiniGame();
+          }
+          return;
+        }
+        const muralCell = event.target.closest("button[data-mural-cell]");
+        if (muralCell && activeMiniGame.mode === "mural") {
+          const index = Number(muralCell.dataset.muralCell);
+          activeMiniGame.mural[index] = (activeMiniGame.mural[index] + 1) % activeMiniGame.palette.length;
+          if (activeMiniGame.mural[index] === activeMiniGame.solution[index] && !activeMiniGame.scoredMuralCells.has(index)) {
+            activeMiniGame.scoredMuralCells.add(index);
+            awardSparks(8);
+          }
+          if (activeMiniGame.mural.every((value, cellIndex) => value === activeMiniGame.solution[cellIndex])) {
+            finishMiniGame();
+          } else {
+            activeMiniGame.muralMessage = "¡Buen trazo! Sigue cambiando casillas hasta copiar el diseño.";
+            renderMiniGame();
+          }
+          return;
+        }
+        if (event.target.closest("button[data-finish-story-continue]") && activeMiniGame.mode === "storybook") {
+          finishMiniGame();
+          return;
+        }
+        if (event.target.closest("button[data-finish-story]") && activeMiniGame.mode === "storybook") {
+          const choices = activeMiniGame.storyChoices;
+          if (choices.some((choice, index) => choice !== activeMiniGame.slots[index].answer)) {
+            breakSparkCombo();
+            activeMiniGame.storyMessage = "Esa combinación aún no sigue la pista del cuento. Revisa las ideas y prueba otra vez.";
+            renderMiniGame();
+            return;
+          }
+          awardSparks(20);
+          activeMiniGame.storyComplete = true;
+          activeMiniGame.storyMessage = `${choices[0]} llegó a ${choices[1]} y descubrió ${choices[2]}. Desde entonces, Alex supo que imaginar permite combinar experiencias conocidas para crear posibilidades nuevas.`;
+          renderMiniGame();
+          return;
+        }
+        const habitatItem = event.target.closest("button[data-habitat-item]");
+        if (habitatItem && activeMiniGame.mode === "habitat") {
+          activeMiniGame.selectedItem = Number(habitatItem.dataset.habitatItem);
+          activeMiniGame.habitatMessage = "Ahora toca el lugar que corresponde a ese elemento.";
+          renderMiniGame();
+          return;
+        }
+        const habitatCell = event.target.closest("button[data-habitat-cell]");
+        if (habitatCell && activeMiniGame.mode === "habitat") {
+          const item = activeMiniGame.items[activeMiniGame.selectedItem];
+          const cell = Number(habitatCell.dataset.habitatCell);
+          if (!item) {
+            activeMiniGame.habitatMessage = "Primero elige un elemento para colocar.";
+          } else if (item.slot !== cell) {
+            breakSparkCombo();
+            activeMiniGame.habitatMessage = "Ese lugar no es el más adecuado. Piensa en lo que necesita el zorro para vivir tranquilo.";
+          } else {
+            activeMiniGame.placements[cell] = item.id;
+            activeMiniGame.selectedItem = null;
+            awardSparks(10);
+            if (activeMiniGame.items.every(placed => activeMiniGame.placements[placed.slot] === placed.id)) {
+              finishMiniGame();
+              return;
+            }
+            activeMiniGame.habitatMessage = "¡Buen lugar! Elige el siguiente elemento y encuentra su sitio.";
+          }
+          renderMiniGame();
+          return;
+        }
+        const matchButton = event.target.closest("button[data-match-card]");
+        if (matchButton && activeMiniGame.mode === "match") {
+          const cardIndex = Number(matchButton.dataset.matchCard);
+          const card = activeMiniGame.cards[cardIndex];
+          if (!card || card.revealed || card.matched) return;
+          card.revealed = true;
+          activeMiniGame.openCards.push(cardIndex);
+          if (activeMiniGame.openCards.length < 2) {
+            renderMiniGame();
+            return;
+          }
+          const game = activeMiniGame;
+          const [firstIndex, secondIndex] = game.openCards;
+          const firstCard = game.cards[firstIndex];
+          const secondCard = game.cards[secondIndex];
+          if (firstCard.id === secondCard.id) {
+            firstCard.matched = true;
+            secondCard.matched = true;
+            firstCard.revealed = false;
+            secondCard.revealed = false;
+            game.openCards = [];
+            game.matches += 1;
+            awardSparks(15);
+            if (game.matches === game.pairCount) {
+              finishMiniGame();
+            } else {
+              renderMiniGame();
+            }
+            return;
+          }
+          breakSparkCombo();
+          game.locked = true;
+          renderMiniGame();
+          miniGameStatus.textContent = "No son pareja. ¡Recuerda las cartas y prueba otra combinación!";
+          window.setTimeout(() => {
+            if (activeMiniGame !== game) return;
+            firstCard.revealed = false;
+            secondCard.revealed = false;
+            game.openCards = [];
+            game.locked = false;
+            renderMiniGame();
+          }, 850);
+          return;
+        }
+        const starButton = event.target.closest("button[data-star]");
+        if (starButton && activeMiniGame.mode === "constellation") {
+          const star = Number(starButton.dataset.star);
+          if (star !== activeMiniGame.solution[activeMiniGame.progress]) {
+            breakSparkCombo();
+            miniGameStatus.textContent = "Esa estrella no sigue el trazo. Prueba con otra.";
+            return;
+          }
+          awardSparks(10);
+          activeMiniGame.path.push(star);
+          activeMiniGame.progress += 1;
+          if (activeMiniGame.progress === activeMiniGame.solution.length) {
+            finishMiniGame();
+          } else {
+            renderMiniGame();
+          }
+          return;
+        }
+        const routeButton = event.target.closest("button[data-route-cell]");
+        if (routeButton && activeMiniGame.mode === "route") {
+          const next = Number(routeButton.dataset.routeCell);
+          const difference = next - activeMiniGame.position;
+          const direction = difference === -activeMiniGame.columns ? "ArrowUp"
+            : difference === 1 ? "ArrowRight"
+              : difference === activeMiniGame.columns ? "ArrowDown"
+                : difference === -1 ? "ArrowLeft" : "";
+          if (direction) moveRoute(direction);
+          else {
+            breakSparkCombo();
+            miniGameStatus.textContent = "Elige una casilla junto a tu barco.";
+          }
+          return;
+        }
+        const pipeButton = event.target.closest("button[data-pipe-tile]");
+        if (pipeButton && activeMiniGame.mode === "pipes") {
+          const tile = activeMiniGame.tiles[Number(pipeButton.dataset.pipeTile)];
+          if (!tile || !["corner", "straight"].includes(tile.type)) return;
+          tile.rotation = (tile.rotation + 1) % 4;
+          activeMiniGame.rotationsMade += 1;
+          if (hasWaterPath(activeMiniGame)) {
+            awardSparks(20);
+            finishMiniGame();
+          } else {
+            activeMiniGame.pipeMessage = "El canal todavía no conecta. ¡Gira otra pieza!";
+            renderMiniGame();
+          }
+          return;
+        }
+        const clueButton = event.target.closest("button[data-clue]");
+        if (clueButton && activeMiniGame.mode === "fieldnotes") {
+          const index = Number(clueButton.dataset.clue);
+          const clue = activeMiniGame.clues[index];
+          if (!clue.needed) {
+            breakSparkCombo();
+            activeMiniGame.fieldMessage = "Esa pista no se puede observar desde aquí. Mantén la distancia y vuelve a mirar.";
+            renderMiniGame();
+            return;
+          }
+          if (activeMiniGame.selectedClues.has(index)) return;
+          activeMiniGame.selectedClues.add(index);
+          awardSparks(10);
+          const total = activeMiniGame.clues.filter(item => item.needed).length;
+          if (activeMiniGame.selectedClues.size === total) {
+            finishMiniGame();
+          } else {
+            activeMiniGame.fieldMessage = "¡Buena observación! Busca otra pista visible desde el sendero.";
+            renderMiniGame();
+          }
+          return;
+        }
+        const choiceButton = event.target.closest("button[data-game-choice]");
+        if (!choiceButton || activeMiniGame.mode !== "classify") return;
+        const round = activeMiniGame.rounds[activeMiniGame.progress];
+        if (Number(choiceButton.dataset.gameChoice) !== round.answer) {
+          breakSparkCombo();
+          activeMiniGame.classifyMessage = "¡Esa no es la pista! Mira de nuevo y prueba otra opción.";
+          miniGameStatus.textContent = activeMiniGame.classifyMessage;
+          return;
+        }
+        awardSparks(10);
+        activeMiniGame.classifyMessage = round.feedback;
+        activeMiniGame.progress += 1;
+        if (activeMiniGame.progress === activeMiniGame.rounds.length) {
+          finishMiniGame();
+          return;
+        }
+        renderMiniGame();
+      });
+
+      shareButton.addEventListener("click", async () => {
+        if (location.protocol === "file:") {
+          showDialog("Comparte el juego", "Para que tus amigos puedan jugar desde sus dispositivos, publica este archivo index.html gratis en GitHub Pages: crea un repositorio, sube el archivo y activa Pages en Settings → Pages. Después comparte el enlace que te dará GitHub.", "shareInfo", "Entendido");
+          return;
+        }
+        try {
+          const shareData = {
+            title: "El viaje de la experiencia humana",
+            text: "¡Acompaña a Alex en esta aventura de ocho misiones!",
+            url: location.href
+          };
+          if (navigator.share) {
+            await navigator.share(shareData);
+          } else if (navigator.clipboard) {
+            await navigator.clipboard.writeText(shareData.url);
+            showDialog("¡Enlace copiado!", "Pégalo en tu chat para invitar a tus amigos.", "shareInfo", "Listo");
+          } else {
+            showDialog("Comparte el juego", "Copia este enlace y envíaselo a tus amigos: " + location.href, "shareInfo", "Listo");
+          }
+        } catch (error) {
+          if (error.name !== "AbortError") {
+            showDialog("No se pudo compartir", "Copia la dirección de esta página desde la barra del navegador y envíasela a tus amigos.", "shareInfo", "Entendido");
+          }
+        }
+      });
+
+      function tree(x, y, color) {
+        ctx.fillStyle = "#263b3550";
+        ctx.beginPath();
+        ctx.ellipse(x + 5, y + 44, 37, 9, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#765a43";
+        ctx.fillRect(x - 8, y - 2, 16, 50);
+        ctx.strokeStyle = "#9c7550";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(x, y + 13);
+        ctx.lineTo(x - 18, y - 2);
+        ctx.moveTo(x + 1, y + 8);
+        ctx.lineTo(x + 18, y - 5);
+        ctx.stroke();
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(x, y - 13, 35, 0, Math.PI * 2);
+        ctx.arc(x - 24, y + 5, 25, 0, Math.PI * 2);
+        ctx.arc(x + 24, y + 5, 25, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#ffffff28";
+        ctx.beginPath();
+        ctx.arc(x - 9, y - 23, 12, Math.PI, Math.PI * 1.8);
+        ctx.arc(x - 31, y - 1, 8, Math.PI, Math.PI * 1.8);
+        ctx.fill();
+      }
+
+      function house(x, y, color) {
+        ctx.fillStyle = "#26334138";
+        ctx.beginPath();
+        ctx.ellipse(x + 49, y + 78, 64, 10, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#f0d7a8";
+        ctx.fillRect(x, y, 96, 76);
+        ctx.fillStyle = "#e7c892";
+        ctx.fillRect(x + 5, y + 6, 86, 66);
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(x - 12, y + 5); ctx.lineTo(x + 48, y - 40); ctx.lineTo(x + 108, y + 5); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = "#ffffff26";
+        ctx.beginPath();
+        ctx.moveTo(x + 48, y - 40); ctx.lineTo(x + 108, y + 5); ctx.lineTo(x + 91, y + 5); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = "#704c3b";
+        ctx.fillRect(x + 37, y + 38, 24, 38);
+        ctx.fillStyle = "#d5a77c";
+        ctx.beginPath(); ctx.arc(x + 55, y + 57, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#a9d8df";
+        ctx.fillRect(x + 10, y + 19, 20, 19); ctx.fillRect(x + 66, y + 19, 20, 19);
+        ctx.strokeStyle = "#f6f0dc"; ctx.lineWidth = 3;
+        ctx.strokeRect(x + 10, y + 19, 20, 19); ctx.strokeRect(x + 66, y + 19, 20, 19);
+        ctx.beginPath(); ctx.moveTo(x + 20, y + 19); ctx.lineTo(x + 20, y + 38); ctx.moveTo(x + 10, y + 28); ctx.lineTo(x + 30, y + 28);
+        ctx.moveTo(x + 76, y + 19); ctx.lineTo(x + 76, y + 38); ctx.moveTo(x + 66, y + 28); ctx.lineTo(x + 86, y + 28); ctx.stroke();
+        ctx.fillStyle = "#9b5744";
+        ctx.fillRect(x + 72, y - 25, 12, 24);
+      }
+
+      function cloud(x, y, scale = 1) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(scale, scale);
+        ctx.fillStyle = "#ffffffa8";
+        ctx.beginPath();
+        ctx.ellipse(0, 5, 42, 13, 0, 0, Math.PI * 2);
+        ctx.arc(-20, 2, 15, Math.PI, Math.PI * 2);
+        ctx.arc(-2, -7, 21, Math.PI, Math.PI * 2);
+        ctx.arc(20, 1, 16, Math.PI, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function hill(color, x, y, width, height) {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(x, y + height);
+        ctx.quadraticCurveTo(x + width * .24, y - height * .35, x + width * .52, y + height * .38);
+        ctx.quadraticCurveTo(x + width * .78, y + height * 1.1, x + width, y + height * .12);
+        ctx.lineTo(x + width, 540);
+        ctx.lineTo(x, 540);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      function flower(x, y, color, size = 1) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(size, size);
+        ctx.strokeStyle = "#427653";
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(0, 2); ctx.lineTo(0, 14); ctx.stroke();
+        ctx.fillStyle = color;
+        for (let petal = 0; petal < 5; petal++) {
+          const angle = petal * Math.PI * 2 / 5;
+          ctx.beginPath(); ctx.arc(Math.cos(angle) * 4, Math.sin(angle) * 4, 3.2, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.fillStyle = "#f7d56f";
+        ctx.beginPath(); ctx.arc(0, 0, 2.5, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+
+      function pumpkin(x, y, size = 1) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(size, size);
+        ctx.fillStyle = "#f29d3b";
+        ctx.beginPath();
+        ctx.moveTo(-18, 12); ctx.quadraticCurveTo(-18, -10, 0, -18); ctx.quadraticCurveTo(18, -10, 18, 12);
+        ctx.quadraticCurveTo(22, 22, 14, 26); ctx.quadraticCurveTo(0, 30, -14, 26); ctx.quadraticCurveTo(-22, 22, -18, 12);
+        ctx.fill();
+        ctx.fillStyle = "#1f1510";
+        ctx.fillRect(-6, -2, 4, 10); ctx.fillRect(2, -2, 4, 10);
+        ctx.beginPath(); ctx.moveTo(-10, 14); ctx.lineTo(0, 20); ctx.lineTo(10, 14); ctx.strokeStyle = "#1f1510"; ctx.lineWidth = 3; ctx.stroke();
+        ctx.restore();
+      }
+
+      function bat(x, y, size = 1) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(size, size);
+        ctx.strokeStyle = "#f3ecf7";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-18, 0); ctx.quadraticCurveTo(-12, -12, 0, 0); ctx.quadraticCurveTo(12, -12, 18, 0);
+        ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-3, 0); ctx.lineTo(-8, 9); ctx.moveTo(3, 0); ctx.lineTo(8, 9); ctx.stroke();
+        ctx.restore();
+      }
+
+      function grave(x, y, size = 1) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(size, size);
+        ctx.fillStyle = "#c9c1d9";
+        ctx.fillRect(-10, -20, 20, 26);
+        ctx.fillStyle = "#544d5d";
+        ctx.fillRect(-6, -16, 3, 10);
+        ctx.fillRect(3, -16, 3, 10);
+        ctx.beginPath(); ctx.moveTo(-2, -20); ctx.lineTo(0, -28); ctx.lineTo(2, -20); ctx.fill();
+        ctx.restore();
+      }
+
+      function fence(x, y, width = 120, height = 18) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.strokeStyle = "#60526c";
+        ctx.lineWidth = 2;
+        for (let i = 0; i <= width; i += 18) {
+          ctx.beginPath();
+          ctx.moveTo(i, 0); ctx.lineTo(i, -height);
+          ctx.moveTo(i - 9, -height * .4); ctx.lineTo(i + 9, -height * .4);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      function spookyTree(x, y, color = "#2a4736", glow = "#8b6f9c") {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.fillStyle = "#1b1719";
+        ctx.fillRect(-8, 0, 16, 48);
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.arc(0, -18, 26, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(-18, -6, 20, 0, Math.PI * 2); ctx.arc(18, -6, 20, 0, Math.PI * 2); ctx.arc(0, 10, 22, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = glow;
+        ctx.beginPath(); ctx.arc(-8, -18, 5, 0, Math.PI * 2); ctx.arc(8, -18, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+
+      function fogBand(y, alpha = 0.18, width = 960) {
+        ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.quadraticCurveTo(width * .12, y - 15, width * .2, y + 8);
+        ctx.quadraticCurveTo(width * .38, y - 20, width * .52, y + 6);
+        ctx.quadraticCurveTo(width * .68, y - 18, width * .8, y + 10);
+        ctx.quadraticCurveTo(width * .9, y - 12, width, y + 8);
+        ctx.lineTo(width, y + 35);
+        ctx.lineTo(0, y + 35);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      function drawWorld(world) {
+        const sky = ctx.createLinearGradient(0, 0, 0, 360);
+        sky.addColorStop(0, "#140d24");
+        sky.addColorStop(0.45, "#2b1b38");
+        sky.addColorStop(1, "#3d2b2f");
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, 960, 540);
+        ctx.fillStyle = "#f5e7b3";
+        ctx.beginPath(); ctx.arc(810, 82, 35, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#f5e7b333";
+        ctx.beginPath(); ctx.arc(810, 82, 53, 0, Math.PI * 2); ctx.fill();
+        for (let i = 0; i < 16; i++) {
+          const x = 70 + i * 52 + (i % 3) * 14;
+          const y = 42 + (i % 5) * 22;
+          ctx.fillStyle = "#f5f1e6cc";
+          ctx.fillRect(x, y, 3, 3);
+        }
+        bat(150, 120, 1); bat(320, 98, 0.8); bat(620, 110, 1.1); bat(820, 140, 0.9);
+        cloud(145, 85, .8); cloud(470, 115, .65);
+        hill("#4a3b57", 0, 210, 580, 100);
+        hill("#382f46", 400, 220, 560, 105);
+        const ground = ctx.createLinearGradient(0, 260, 0, 540);
+        ground.addColorStop(0, "#3e2b2d");
+        ground.addColorStop(1, "#1b171b");
+        ctx.fillStyle = ground;
+        ctx.fillRect(0, 260, 960, 280);
+        fogBand(330, 0.18);
+        fogBand(390, 0.12);
+        if (world.scenery === "town") {
+          hill("#5d423b", 0, 240, 960, 90);
+          ctx.fillStyle = "#a77a4f";
+          ctx.beginPath(); ctx.moveTo(0, 428); ctx.quadraticCurveTo(430, 390, 960, 422); ctx.lineTo(960, 465); ctx.quadraticCurveTo(430, 433, 0, 466); ctx.closePath(); ctx.fill();
+          ctx.strokeStyle = "#f4d7a2"; ctx.lineWidth = 3;
+          ctx.beginPath(); ctx.moveTo(0, 435); ctx.quadraticCurveTo(430, 397, 960, 429); ctx.moveTo(0, 458); ctx.quadraticCurveTo(430, 425, 960, 456); ctx.stroke();
+          house(78, 215, "#5d3c46"); house(784, 212, "#473f5d");
+          spookyTree(468, 266, "#2b4a3a", "#8c7faf"); spookyTree(878, 270, "#385f46", "#b98b62");
+          ctx.fillStyle = "#3f2a21"; ctx.fillRect(310, 366, 88, 8); ctx.fillRect(320, 374, 7, 24); ctx.fillRect(380, 374, 7, 24);
+          ctx.fillStyle = "#ead8ad"; ctx.fillRect(344, 350, 4, 16); ctx.fillStyle = "#ffedb5"; ctx.beginPath(); ctx.arc(346, 346, 8, 0, Math.PI * 2); ctx.fill();
+          [205, 230, 736, 760].forEach((x, i) => pumpkin(x, 408 + i % 2 * 8, .75));
+          [35, 155, 435, 860].forEach(x => { ctx.fillStyle = "#d8d0c6"; ctx.beginPath(); ctx.arc(x, 445, 14, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = "#00000066"; ctx.fillRect(x - 11, 450, 22, 3); });
+          fence(0, 460, 960, 18);
+          [90, 205, 315, 610, 735, 840].forEach(x => grave(x, 463, .95));
+        } else if (world.scenery === "forest") {
+          hill("#3d4d43", 0, 235, 960, 110);
+          [50, 165, 285, 420, 555, 760, 910].forEach((x, i) => tree(x, 245 + i % 2 * 20, i % 2 ? "#2f4d41" : "#3d6551"));
+          ctx.fillStyle = "#1f4b53";
+          ctx.beginPath(); ctx.moveTo(0, 452); ctx.quadraticCurveTo(170, 415, 360, 455); ctx.quadraticCurveTo(555, 497, 720, 447); ctx.quadraticCurveTo(850, 410, 960, 430); ctx.lineTo(960, 540); ctx.lineTo(0, 540); ctx.closePath(); ctx.fill();
+          ctx.strokeStyle = "#9fd5c7"; ctx.lineWidth = 5;
+          ctx.beginPath(); ctx.moveTo(0, 458); ctx.quadraticCurveTo(180, 424, 365, 462); ctx.quadraticCurveTo(555, 502, 720, 454); ctx.quadraticCurveTo(855, 418, 960, 437); ctx.stroke();
+          [275, 300, 675, 700].forEach((x, i) => pumpkin(x, 448 + i % 2 * 14, .7));
+          bat(90, 170, .9); bat(740, 170, .8); bat(520, 250, .7);
+          [120, 240, 370, 810].forEach(x => grave(x, 474, .8));
+        } else if (world.scenery === "harbor") {
+          hill("#4f3b3d", 0, 315, 960, 85);
+          const sea = ctx.createLinearGradient(0, 380, 0, 540);
+          sea.addColorStop(0, "#2a405d"); sea.addColorStop(1, "#151d2d");
+          ctx.fillStyle = sea; ctx.fillRect(0, 390, 960, 150);
+          ctx.fillStyle = "#d4bf8d";
+          ctx.beginPath(); ctx.moveTo(0, 377); ctx.quadraticCurveTo(250, 390, 480, 379); ctx.quadraticCurveTo(730, 368, 960, 383); ctx.lineTo(960, 404); ctx.quadraticCurveTo(700, 391, 480, 402); ctx.quadraticCurveTo(240, 413, 0, 399); ctx.closePath(); ctx.fill();
+          ctx.strokeStyle = "#f0dfad88"; ctx.lineWidth = 3;
+          for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.moveTo(80 + i * 190, 430 + i % 2 * 25); ctx.quadraticCurveTo(125 + i * 190, 423 + i % 2 * 25, 170 + i * 190, 430 + i % 2 * 25); ctx.stroke(); }
+          ctx.fillStyle = "#3a2d2a"; ctx.fillRect(655, 330, 110, 9); ctx.fillRect(670, 339, 8, 56); ctx.fillRect(740, 339, 8, 56);
+          ctx.fillStyle = "#564243"; ctx.beginPath(); ctx.moveTo(600, 368); ctx.lineTo(780, 368); ctx.lineTo(755, 395); ctx.lineTo(625, 395); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = "#f1d59e"; ctx.fillRect(688, 294, 5, 74);
+          ctx.fillStyle = "#fff7df"; ctx.beginPath(); ctx.moveTo(693, 300); ctx.lineTo(747, 355); ctx.lineTo(693, 355); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = "#d2785d"; ctx.beginPath(); ctx.moveTo(693, 303); ctx.lineTo(693, 350); ctx.lineTo(716, 350); ctx.closePath(); ctx.fill();
+          house(72, 254, "#4d3840");
+          pumpkin(228, 420, 1.1); pumpkin(760, 420, .9);
+          bat(645, 160, .8); bat(810, 100, .7); 
+        } else {
+          ctx.fillStyle = "#4c5663";
+          ctx.beginPath(); ctx.moveTo(0, 300); ctx.lineTo(160, 85); ctx.lineTo(320, 300); ctx.closePath(); ctx.fill();
+          ctx.beginPath(); ctx.moveTo(205, 300); ctx.lineTo(405, 115); ctx.lineTo(600, 300); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = "#f7f2df";
+          ctx.beginPath(); ctx.moveTo(108, 155); ctx.lineTo(160, 85); ctx.lineTo(215, 159); ctx.lineTo(177, 147); ctx.lineTo(155, 176); ctx.closePath(); ctx.fill();
+          ctx.beginPath(); ctx.moveTo(344, 172); ctx.lineTo(405, 115); ctx.lineTo(458, 166); ctx.lineTo(418, 154); ctx.lineTo(394, 185); ctx.closePath(); ctx.fill();
+          hill("#5f5f68", 0, 255, 960, 105);
+          tree(100, 250, "#2f5847"); tree(862, 250, "#385a50");
+          const stream = ctx.createLinearGradient(0, 320, 0, 540);
+          stream.addColorStop(0, "#4b6878"); stream.addColorStop(1, "#1d304b");
+          ctx.fillStyle = stream;
+          ctx.beginPath(); ctx.moveTo(350, 300); ctx.quadraticCurveTo(525, 255, 645, 312); ctx.quadraticCurveTo(690, 390, 570, 430); ctx.quadraticCurveTo(460, 472, 665, 540); ctx.lineTo(300, 540); ctx.quadraticCurveTo(400, 466, 478, 435); ctx.quadraticCurveTo(590, 393, 520, 330); ctx.closePath(); ctx.fill();
+          [230, 255, 800, 825].forEach((x, i) => pumpkin(x, 410 + i % 2 * 18, .75));
+          [50, 210, 700, 875].forEach(x => grave(x, 470, .8));
+        }
+        ctx.strokeStyle = "#ffffff22"; ctx.lineWidth = 2;
+        for (let i = 0; i < 14; i++) {
+          const x = (i * 83 + 25) % 950;
+          const y = 485 + (i % 3) * 17;
+          ctx.beginPath(); ctx.moveTo(x, y + 5); ctx.quadraticCurveTo(x - 4, y - 2, x - 5, y - 7); ctx.moveTo(x, y + 5); ctx.quadraticCurveTo(x + 5, y - 2, x + 7, y - 6); ctx.stroke();
+        }
+      }
+
+      function character(x, y, shirt, time, appearance = 0, scale = 1) {
+        const looks = [
+          { skin: "#e5a56b", hair: "#49332d", accent: "#f0cf75", style: "band" },
+          { skin: "#9b6047", hair: "#25252e", accent: "#83c4a0", style: "curl" },
+          { skin: "#f0c49a", hair: "#ad6845", accent: "#e99c82", style: "flower" },
+          { skin: "#b97955", hair: "#342a2b", accent: "#b8a0df", style: "hat" },
+          { skin: "#f0bd83", hair: "#65402f", accent: "#78b9c9", style: "scarf" },
+          { skin: "#7e4f43", hair: "#25232c", accent: "#e4a3b8", style: "curl" },
+          { skin: "#d99367", hair: "#41332e", accent: "#f1ce7b", style: "band" },
+          { skin: "#edc299", hair: "#805138", accent: "#8bc29b", style: "hat" },
+          { skin: "#d99268", hair: "#302c35", accent: "#f4cb67", style: "backpack" }
+        ];
+        const look = looks[((appearance % looks.length) + looks.length) % looks.length];
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(scale, scale);
+        const bob = Math.sin(time / 180 + x) * 2;
+        const stride = Math.sin(time / 125 + x) * 2.2;
+        ctx.fillStyle = "#16203344"; ctx.beginPath(); ctx.ellipse(0, 25, 20, 7, 0, 0, Math.PI * 2); ctx.fill();
+        if (look.style === "backpack") {
+          ctx.fillStyle = "#a85c45";
+          ctx.beginPath(); ctx.roundRect(7, 0 + bob, 10, 15, 4); ctx.fill();
+          ctx.fillStyle = "#e9c779";
+          ctx.beginPath(); ctx.roundRect(9, 3 + bob, 6, 5, 2); ctx.fill();
+        }
+        ctx.strokeStyle = "#493c3b"; ctx.lineWidth = 5; ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(-5, 16 + bob); ctx.lineTo(-7 + stride, 28 + bob); ctx.moveTo(5, 16 + bob); ctx.lineTo(7 - stride, 28 + bob); ctx.stroke();
+        ctx.strokeStyle = "#f3ead7"; ctx.lineWidth = 5;
+        ctx.beginPath(); ctx.moveTo(-7 + stride, 28 + bob); ctx.lineTo(-12 + stride, 29 + bob); ctx.moveTo(7 - stride, 28 + bob); ctx.lineTo(12 - stride, 29 + bob); ctx.stroke();
+        ctx.strokeStyle = look.skin; ctx.lineWidth = 5;
+        ctx.beginPath(); ctx.moveTo(-10, 1 + bob); ctx.lineTo(-15, 13 + bob); ctx.moveTo(10, 1 + bob); ctx.lineTo(15, 11 + bob); ctx.stroke();
+        ctx.fillStyle = shirt;
+        ctx.beginPath(); ctx.roundRect(-12, -3 + bob, 24, 22, 7); ctx.fill();
+        ctx.fillStyle = look.accent;
+        ctx.beginPath(); ctx.moveTo(-4, -2 + bob); ctx.lineTo(0, 6 + bob); ctx.lineTo(4, -2 + bob); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = "#ffffff30";
+        ctx.beginPath(); ctx.roundRect(-9, 1 + bob, 4, 12, 2); ctx.fill();
+        ctx.fillStyle = look.skin;
+        ctx.beginPath(); ctx.arc(0, -14 + bob, 11, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = look.hair;
+        ctx.beginPath();
+        if (look.style === "curl") {
+          ctx.arc(-6, -19 + bob, 5, Math.PI, Math.PI * 2);
+          ctx.arc(0, -21 + bob, 6, Math.PI, Math.PI * 2);
+          ctx.arc(6, -19 + bob, 5, Math.PI, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.ellipse(0, -21 + bob, 11, 6, 0, Math.PI, Math.PI * 2);
+          ctx.fill();
+          ctx.beginPath(); ctx.moveTo(-10, -20 + bob); ctx.lineTo(-8, -27 + bob); ctx.lineTo(-2, -24 + bob); ctx.lineTo(3, -28 + bob); ctx.lineTo(9, -23 + bob); ctx.lineTo(10, -18 + bob); ctx.closePath(); ctx.fill();
+        }
+        ctx.fillStyle = "#273342";
+        ctx.beginPath(); ctx.arc(-4, -14 + bob, 1.2, 0, Math.PI * 2); ctx.arc(4, -14 + bob, 1.2, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = "#874b45"; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.arc(0, -11 + bob, 3, .15, Math.PI - .15); ctx.stroke();
+        if (look.style === "hat") {
+          ctx.fillStyle = look.accent;
+          ctx.beginPath(); ctx.ellipse(0, -25 + bob, 14, 3, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillRect(-8, -32 + bob, 16, 7);
+        } else if (look.style === "band") {
+          ctx.strokeStyle = look.accent; ctx.lineWidth = 3;
+          ctx.beginPath(); ctx.arc(0, -14 + bob, 11, Math.PI + .35, Math.PI * 1.85); ctx.stroke();
+        } else if (look.style === "flower") {
+          ctx.fillStyle = look.accent;
+          ctx.beginPath(); ctx.arc(8, -22 + bob, 3, 0, Math.PI * 2); ctx.arc(12, -22 + bob, 3, 0, Math.PI * 2); ctx.arc(10, -25 + bob, 3, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = "#f5d477"; ctx.beginPath(); ctx.arc(10, -22 + bob, 2, 0, Math.PI * 2); ctx.fill();
+        } else if (look.style === "scarf") {
+          ctx.fillStyle = look.accent;
+          ctx.beginPath(); ctx.moveTo(-10, -2 + bob); ctx.lineTo(10, -2 + bob); ctx.lineTo(7, 3 + bob); ctx.lineTo(-7, 3 + bob); ctx.closePath(); ctx.fill();
+          ctx.beginPath(); ctx.moveTo(6, 1 + bob); ctx.lineTo(12, 13 + bob); ctx.lineTo(7, 12 + bob); ctx.closePath(); ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      function drawFox(time) {
+        const x = 740 + Math.sin(time / 1100) * 48;
+        const y = 410 + Math.sin(time / 620) * 4;
+        ctx.save();
+        ctx.fillStyle = "#24344055";
+        ctx.beginPath(); ctx.ellipse(x, y + 12, 31, 8, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#c96e36";
+        ctx.beginPath(); ctx.ellipse(x - 20, y - 3, 22, 10, -.25, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(x + 18, y - 7); ctx.quadraticCurveTo(x + 43, y - 26, x + 37, y - 2); ctx.quadraticCurveTo(x + 34, y + 7, x + 20, y + 3); ctx.fill();
+        ctx.fillStyle = "#f6ead1";
+        ctx.beginPath(); ctx.arc(x + 38, y - 4, 4, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#c96e36";
+        ctx.beginPath(); ctx.arc(x + 4, y - 11, 12, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(x - 4, y - 18); ctx.lineTo(x - 8, y - 31); ctx.lineTo(x + 2, y - 21); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(x + 5, y - 20); ctx.lineTo(x + 12, y - 31); ctx.lineTo(x + 13, y - 17); ctx.fill();
+        ctx.fillStyle = "#f6ead1";
+        ctx.beginPath(); ctx.ellipse(x + 12, y - 8, 8, 5, -.2, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#26313c";
+        ctx.beginPath(); ctx.arc(x + 7, y - 14, 1.5, 0, Math.PI * 2); ctx.arc(x + 19, y - 9, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+
+      function drawFrog(time) {
+        const x = 625 + Math.sin(time / 680) * 10;
+        const hop = Math.max(0, Math.sin(time / 170)) * 5;
+        const y = 393 - hop;
+        ctx.fillStyle = "#316d4a";
+        ctx.beginPath(); ctx.ellipse(x, y, 13, 8, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x - 7, y - 6, 4, 0, Math.PI * 2); ctx.arc(x + 7, y - 6, 4, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#f4f0dc";
+        ctx.beginPath(); ctx.arc(x - 7, y - 6, 1.5, 0, Math.PI * 2); ctx.arc(x + 7, y - 6, 1.5, 0, Math.PI * 2); ctx.fill();
+      }
+
+      function draw(time) {
+        if (cinematic) {
+          drawCinematic(time);
+          return;
+        }
+        const world = worlds[worldIndex];
+        const task = currentTask();
+        drawWorld(world);
+        if (world.scenery === "valley" && taskIndex === 0) drawFrog(time);
+        if (world.scenery === "valley" && taskIndex === 1) drawFox(time);
+        if (startedTasks.has(completedTaskCount()) && actionProgress < task.action.targets.length) {
+          const actionColors = {
+            community: "#e5a56b",
+            investigate: "#71b7bd",
+            imagine: "#b696df",
+            empathy: "#e48eaa",
+            navigate: "#e0b15f",
+            ecology: "#81ba73",
+            observe: "#79b6a1"
+          };
+          if (task.action.orderMatters) {
+            ctx.save();
+            ctx.strokeStyle = `${actionColors[task.action.kind]}88`;
+            ctx.lineWidth = 3;
+            ctx.setLineDash([5, 9]);
+            ctx.beginPath();
+            task.action.targets.forEach((target, index) => {
+              if (index === 0) ctx.moveTo(target.x, target.y - 20);
+              else ctx.lineTo(target.x, target.y - 20);
+            });
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.restore();
+          }
+          task.action.targets.forEach((target, index) => {
+            if (actionCompleted.has(index)) return;
+            const active = !task.action.orderMatters || index === actionProgress;
+            const pulse = active ? 1 + Math.sin(time / 190) * .1 : 1;
+            ctx.save();
+            if (target.npc) character(target.x + 34, target.y + 2, index % 2 ? "#527e70" : "#b46a66", time, (worldIndex + taskIndex + index) % 8, .82);
+            ctx.globalAlpha = active ? 1 : .48;
+            ctx.fillStyle = actionColors[task.action.kind];
+            ctx.strokeStyle = "#fff7da";
+            ctx.lineWidth = active ? 3 : 1;
+            ctx.beginPath();
+            if (task.action.kind === "navigate") {
+              ctx.moveTo(target.x, target.y - 32 * pulse);
+              ctx.lineTo(target.x + 25 * pulse, target.y - 7);
+              ctx.lineTo(target.x, target.y + 18 * pulse);
+              ctx.lineTo(target.x - 25 * pulse, target.y - 7);
+              ctx.closePath();
+            } else if (task.action.kind === "observe") {
+              ctx.ellipse(target.x, target.y - 7, 29 * pulse, 20 * pulse, 0, 0, Math.PI * 2);
+            } else {
+              ctx.arc(target.x, target.y - 7, 25 * pulse, 0, Math.PI * 2);
+            }
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = "#17233a";
+            ctx.font = "bold 12px system-ui";
+            ctx.textAlign = "center";
+            ctx.fillText(String(index + 1), target.x, target.y - 3);
+            ctx.fillStyle = "#fff7df";
+            ctx.font = "23px sans-serif";
+            ctx.fillText(target.icon, target.x, target.y - 38);
+            if (Math.hypot(player.x - target.x, player.y - target.y) < 70) {
+              ctx.fillStyle = "#17233a";
+              ctx.strokeStyle = "#ffe28a";
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              ctx.roundRect(target.x - 105, target.y + 23, 210, 30, 8);
+              ctx.fill();
+              ctx.stroke();
+              ctx.fillStyle = "#ffe28a";
+              ctx.font = "bold 13px system-ui";
+                  const targetPrompt = isAutoTarget(task, target)
+                ? `Pasa por aquí · ${target.label}`
+                    : `${target.npc ? "E · Hablar" : target.miniGame ? "E · Minijuego" : target.challenge ? "E · Reto" : "E · Acción"} · ${target.label}`;
+              ctx.fillText(targetPrompt, target.x, target.y + 43, 205);
+            }
+            ctx.restore();
+          });
+        }
+        const pulse = 1 + Math.sin(time / 230) * .08;
+        ctx.fillStyle = "#ffe28a55"; ctx.beginPath(); ctx.arc(task.x, task.y - 49, 36 * pulse, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#fff0b5"; ctx.font = "36px sans-serif"; ctx.textAlign = "center"; ctx.fillText(task.icon, task.x, task.y - 38);
+        character(task.x, task.y, "#b46a66", time, (worldIndex * 2 + taskIndex) % 8);
+        if (Math.hypot(player.x - task.x, player.y - task.y) < 105) {
+          ctx.fillStyle = "#17233a"; ctx.strokeStyle = "#ffe28a"; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.roundRect(task.x - 75, task.y + 43, 150, 31, 9); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = "#ffe28a"; ctx.font = "bold 15px system-ui";
+          const isStarted = startedTasks.has(completedTaskCount());
+          const npcPrompt = !isStarted ? "E · recibir misión"
+            : actionProgress < task.action.targets.length ? "Completa la acción del escenario"
+              : "E · volver y hablar";
+          ctx.fillText(npcPrompt, task.x, task.y + 64);
+        }
+        character(player.x, player.y, "#394f7b", time, 8);
+      }
+
+      function drawCinematic(time) {
+        drawWorld(worlds[cinematic.fromWorld]);
+        const pulse = 1 + Math.sin(time / 300) * .08;
+        const centerX = cinematic.toWorld < 0 ? 480 : 710;
+        const centerY = 250;
+        const glow = ctx.createRadialGradient(centerX, centerY, 20, centerX, centerY, 270);
+        glow.addColorStop(0, "#ffe28a55");
+        glow.addColorStop(1, "#ffe28a00");
+        ctx.fillStyle = glow;
+        ctx.fillRect(0, 0, 960, 540);
+        ctx.save();
+        ctx.globalAlpha = .8;
+        ctx.strokeStyle = "#ffe28a";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 92 * pulse, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.globalAlpha = .35;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 122 * pulse, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+
+        const floatingX = cinematic.toWorld < 0
+          ? centerX + Math.cos(time / 650) * 112
+          : centerX + Math.sin(time / 550) * 42;
+        const floatingY = centerY + Math.sin(time / 430) * 28;
+        ctx.save();
+        ctx.translate(floatingX, floatingY);
+        ctx.rotate(Math.sin(time / 700) * .12);
+        ctx.fillStyle = "#fff7df";
+        ctx.strokeStyle = "#d9b866";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(-42, -52, 84, 104, 8);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = "#8b6846";
+        ctx.font = "48px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(cinematic.emblem, 0, 16);
+        ctx.restore();
+
+        if (cinematic.toWorld < 0) {
+          ctx.fillStyle = "#ffe28a";
+          ctx.textAlign = "center";
+          ctx.font = "bold 30px system-ui";
+          ctx.fillText("Las páginas se unen", 480, 430);
+          character(350, 390 + Math.sin(time / 280) * 3, "#394f7b", time, 8);
+        } else {
+          character(260 + Math.sin(time / 900) * 35, 390, "#394f7b", time, 8);
+          ctx.fillStyle = "#fff7df";
+          ctx.textAlign = "center";
+          ctx.font = "bold 17px system-ui";
+          ctx.fillText("Una nueva etapa comienza…", 700, 410);
+        }
+      }
+
+      function frame(time) {
+        if (!gameStarted) {
+          requestAnimationFrame(frame);
+          return;
+        }
+        const dt = Math.min(time - previousTime || 16, 32);
+        previousTime = time;
+        const task = currentTask();
+        if (dialog.hidden && !activeMiniGame && !finished && startedTasks.has(completedTaskCount()) &&
+            actionProgress < task.action.targets.length) {
+          const targetIndex = currentActionTarget(task);
+          const target = task.action.targets[targetIndex];
+          if (isAutoTarget(task, target) && Math.hypot(player.x - target.x, player.y - target.y) < 30) {
+            completeActionTarget(task, targetIndex);
+          }
+        }
+        if (dialog.hidden && !activeMiniGame && !cinematic && !finished) {
+          let dx = 0, dy = 0;
+          if (keys.has("ArrowLeft") || keys.has("a")) dx--;
+          if (keys.has("ArrowRight") || keys.has("d")) dx++;
+          if (keys.has("ArrowUp") || keys.has("w")) dy--;
+          if (keys.has("ArrowDown") || keys.has("s")) dy++;
+          if (dx && dy) { dx *= Math.SQRT1_2; dy *= Math.SQRT1_2; }
+          player.x = Math.max(25, Math.min(935, player.x + dx * player.speed * dt / 16));
+          player.y = Math.max(300, Math.min(495, player.y + dy * player.speed * dt / 16));
+        }
+        draw(time);
+        requestAnimationFrame(frame);
+      }
+
+      function activateDialog() {
+        if (cinematic) {
+          finishCinematic();
+          return;
+        }
+        if (dialogStage === "wrapUp" || dialogStage === "actionChallenge") {
+          (choices.querySelector(":focus") || choices.querySelector("button"))?.click();
+        } else {
+          dialogButton.click();
+        }
+      }
+
+      document.addEventListener("keydown", event => {
+        const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+        if (activeMiniGame) {
+          if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " ", "e"].includes(event.key) || key === "e") {
+            event.preventDefault();
+            if (!event.repeat) advanceMiniGame([" ", "e"].includes(key) || event.key === " " ? "interact" : key);
+          }
+          return;
+        }
+        if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " "].includes(event.key)) event.preventDefault();
+        if ((key === "e" || event.key === " ") && !event.repeat) {
+          if (cinematic || !dialog.hidden) activateDialog(); else interact();
+        }
+        keys.add(key);
+      });
+      document.addEventListener("keyup", event => keys.delete(event.key.length === 1 ? event.key.toLowerCase() : event.key));
+      window.addEventListener("blur", () => keys.clear());
+      document.querySelectorAll(".touch button").forEach(button => {
+        const key = button.dataset.key;
+        button.addEventListener("pointerdown", event => {
+          event.preventDefault();
+          if (activeMiniGame) {
+            advanceMiniGame(key === "interact" ? "interact" : key);
+            return;
+          }
+          if (key === "interact") { if (cinematic || !dialog.hidden) activateDialog(); else interact(); }
+          else keys.add(key);
+          button.setPointerCapture(event.pointerId);
+        });
+        const release = () => keys.delete(key);
+        button.addEventListener("pointerup", release);
+        button.addEventListener("pointercancel", release);
+        button.addEventListener("lostpointercapture", release);
+      });
+      playButton.addEventListener("click", () => {
+        sparkScore = 0;
+        sparkCombo = 0;
+        lastSparkAward = 0;
+        updateSparkScore();
+        titleScreen.hidden = true;
+        gameShell.hidden = false;
+        gameStarted = true;
+        showDialog("El diario de Alex", "Alex encontró un diario cuyas páginas se dispersaron por distintos mundos. Cada misión propone un juego diferente: organiza una asamblea, prepara una receta, investiga pistas, dibuja una constelación, conecta sentimientos, navega, repara un canal y observa la naturaleza. Usa el teclado o toca los elementos en pantalla; también funciona en celular y tablet. Cada buena jugada suma chispas y, al encadenar tres aciertos, ¡ganas un bonus!", "intro", "Comenzar aventura");
+      });
+      updateHud();
+      requestAnimationFrame(frame);
+    })();
+  </script>
+</body>
+</html>
